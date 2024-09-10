@@ -6,7 +6,7 @@ print('\n\n\n*********************************produccion**********************\n
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', cast=bool)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['pamoback-nexuspamo.up.railway.app']
 
 DATABASES = {
     'default': {
