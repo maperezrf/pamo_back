@@ -23,7 +23,7 @@ class MainProducts(models.Model):
     kit = models.BooleanField(default=False, null=False, blank=False)
     items_number = models.IntegerField(default=0, null=False, blank=False)
     image_link = models.CharField(max_length=500, null=True, blank=True)
-    category = models.CharField(max_length=300, null=True, blank=True)
+    category = models.CharField(max_length=500, null=True, blank=True)
 
     def __str__(self) -> str:
         return self.sku if self.sku else ''
