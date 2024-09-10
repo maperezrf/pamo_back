@@ -1,0 +1,123 @@
+{% extends 'index.html' %}
+
+{% block title %}
+Comprobación datos
+{% endblock %}
+
+{% block page_name %} 
+Productos
+{% endblock %}
+
+{% block subpage_name %} 
+Comprobación datos
+{% endblock %}
+
+{% block name_now %} 
+Comprobación de datos
+{% endblock %}
+
+{% block content %}
+{% load static %}
+<script src="{% static 'js/functions.js' %}"></script>
+<h1 class="container text-center space">Cotizaciones</h1>
+<div class = "container my-4"> 
+  <div class = "row" >  
+    <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
+      <table class="table table-striped container space"  id="cotizaciones">
+        <thead >
+          <tr >  
+            <th scope="col" class = 'h4 text-center'>ID</th>
+            <th scope="col" class = 'h4 text-center'>Titulo</th>
+            <th scope="col" class = 'h4 text-center'>Tags</th>
+            <th scope="col" class = 'h4 text-center'>Proveedor</th>
+            <th scope="col" class = 'h4 text-center'>Precio</th>
+            <th scope="col" class = 'h4 text-center'>Precio comparación</th>
+            <th scope="col" class = 'h4 text-center'>SKU</th>
+            <th scope="col" class = 'h4 text-center'>Codigo barras</th>
+            <th scope="col" class = 'h4 text-center'>Stock</th>
+          </tr>
+        </thead>
+          {% for i in table %}
+          <tr>
+            <td class="h5 name" id = 'name'>{{i.id}}</td>
+            <td class="h5">{{i.title}}</td>
+            <td class="h5">{{i.tags}}</td>
+            <td class="h5">{{i.vendor}}</td>
+            <td class="h5"><script> document.write(formatNumber({{i.price}})) </script></td>
+            <td class="h5"><script> document.write(formatNumber({{i.compareAtPrice}})) </script></td>
+            <td class="h5">{{i.sku}}</td>
+            <td class="h5">{{i.barcode}}</td>
+            <td class="h5">{{i.inventoryQuantity}}</td>
+          </td> 
+          </tr>
+          {% endfor %}
+        </table>
+    </div>
+  </div>
+</div>
+
+{% comment %} <script>
+
+  let dataTable;
+  let dataTableIsInitialized = false;
+  
+  const dataTableOptions = {
+    pageLength:25,
+    destroy:true,
+    order: [[0, 'desc']],
+    columnDefs:[{className:'text-center', targets:[0,1,2,3,4,5,6,7,8]}],
+    language: {
+      "sProcessing": "Procesando...",
+      "sLengthMenu": "Mostrar _MENU_ registros por página",
+      "sZeroRecords": "No se encontraron resultados",
+      "sEmptyTable": "Ningún dato disponible en esta tabla",
+      "sInfo": "Mostrando _START_ a _END_ de _TOTAL_ registros",
+      "sInfoEmpty": "Mostrando 0 a 0 de 0 registros",
+      "sInfoFiltered": "(filtrado de _MAX_ registros en total)",
+      "sInfoPostFix": "",
+      "sSearch": "Buscar:",
+      "sUrl": "",
+      "sInfoThousands": ",",
+      "sLoadingRecords": "Cargando...",
+      "oPaginate": {
+        "sFirst": "Primero",
+        "sLast": "Último",
+        "sNext": "Siguiente",
+        "sPrevious": "Anterior"
+      },
+    },
+  }
+
+  const initDataTable = async() => {
+    if(dataTableIsInitialized){
+      dataTable.destroy();
+    }
+    dataTable=$("#cotizaciones").DataTable(dataTableOptions);
+    dataTableIsInitialized = true;
+    console.log('inicia')
+  }
+  
+  const botonesImprimir = document.querySelectorAll('.imprimir-btn');
+  botonesImprimir.forEach((boton) => {
+    boton.addEventListener('click', function() {
+      const popup = window.open('/quoteprint/'+ this.getAttribute('id_draft').replace('gid://shopify/DraftOrder/','') +'/print/', '', 'width=1200,height=700'); 
+    })
+  })
+
+  const botonesActualizar = document.querySelectorAll('.update-btn');
+  botonesActualizar.forEach((boton) => {
+    boton.addEventListener('click', function() {
+    $.ajax('/quoteprint/'+this.getAttribute('id_draft').replace('gid://shopify/DraftOrder/','')+'/update',{
+      success: function(data, status, xhr){
+        location.reload();
+      }
+    })
+    })
+  })
+
+  window.addEventListener("load", async () =>{
+    await initDataTable();
+  })
+
+</script> {% endcomment %}
+{% endblock %}
