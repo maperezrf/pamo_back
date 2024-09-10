@@ -12,9 +12,7 @@ db.sqlite3-journal
 media
 local.py
 *.json
-manage.py
-pamo_back/asgi.py
-pamo_back/wsgi.py
+
 
 
 # If your build process includes running collectstatic, then you probably don't need or want to include staticfiles/
