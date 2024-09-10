@@ -55,13 +55,15 @@ class OAuthAPIView(APIView):
 
 
 class NotificationHandlerShopífy(APIView):
-    print('\n**********************se recivió una notificación shopify******************************\n')
+    
     def post(self, request):
+        print('\n**********************se recivió una notificación shopify******************************\n')
         data = request.data
         return Response(data = data)
     
 class NotificationHandlerMeli(APIView):
-    print('\n**********************se recivió una notificación meli******************************\n')
+    
     def post(self, request):
+        print('\n**********************se recivió una notificación meli******************************\n')
         data = request.data
         return Response(data = data)
