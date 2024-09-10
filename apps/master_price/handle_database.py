@@ -1,6 +1,6 @@
 from apps.master_price.models import MainProducts
 from apps.master_price.conecctions_shopify import ConnectionsShopify
-from apps.master_price.graphiqL_queries import get_cost_product
+from apps.master_price.graphiqL_queries import GET_COST_PRODUCT
 
 def update_or_create_main_product(product_json):
     print('Parametros iniciales')
@@ -13,8 +13,8 @@ def update_or_create_main_product(product_json):
     variants = product_json['variants']
     category = product_json['category']['full_name']
     print('Parametros Variantes')
-    for i in range(variants.shape[0]):
-        response = con.request_graphql(get_cost_product)
+    for i in len(variants):
+        response = con.request_graphql(GET_COST_PRODUCT.format('gid://shopify/ProductVariant/' + i['id']))
         object, created = MainProducts.objects.get_or_create(i['id'])
         object.id_product = id_product
         object.title = title
@@ -27,10 +27,13 @@ def update_or_create_main_product(product_json):
         object.sku = i['sku']
         object.barcode = i['barcode']
         object.inventory_quantity = i['inventory_quantity']
-        object.costo = float(response['productVariant']['unitCost']['amount'])
+        try:
+            object.costo = float(response['productVariant']['unitCost']['amount'])
+        except:    
+            pass
         try:
             object.image_link = product_json['images'][0]['src']
         except:
-            object.image_link = 'sin imagen'
+            pass
         object.category = category
         object.save()

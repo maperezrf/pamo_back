@@ -1,4 +1,4 @@
-get_cost_product = """{{
+GET_COST_PRODUCT = """{{
   shop {{
     name
   }}
