@@ -59,7 +59,7 @@ class NotificationHandlerShopífy(APIView):
     def post(self, request):
         print('\n**********************se recivió una notificación shopify******************************\n')
         data = request.data
-        print(data)
+        print(data['admin_graphql_api_id'])
         return Response(data = data)
     
 class NotificationHandlerMeli(APIView):
