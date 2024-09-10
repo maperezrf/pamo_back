@@ -23,7 +23,7 @@ class OAuthAPIView(APIView):
     def get(self, request):
         return Response(data = {'price_cost'})
  
-    def update_prodcuts():
+    def update_products():
         con = connMeli()    
         price_cost = con.get_taxes(20000)
         products = con.get_all_publications()
@@ -56,6 +56,15 @@ class OAuthAPIView(APIView):
 
 
 class NotificationHandlerShopífy(APIView):
+    
+    def post(self, request):
+        print('\n**********************se recivió una notificación shopify******************************\n')
+        data = request.data
+        print(data)
+        update_or_create_main_product(data)
+        return Response(data = data)
+    
+class NotificationDeleteShopífy(APIView):
     
     def post(self, request):
         print('\n**********************se recivió una notificación shopify******************************\n')
