@@ -39,8 +39,9 @@ def update_or_create_main_product(product_json):
     
 def delete_main_product(product_json):
     try:
-        item = MainProducts.objects.get(id_variantShopi = product_json['id'] )
-        item.delete()
+        item = MainProducts.objects.filter(id_variantShopi = product_json['id'] )
+        for i in item:
+            i.delete()
     except:
         pass
 
