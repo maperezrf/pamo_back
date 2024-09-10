@@ -59,11 +59,13 @@ class NotificationHandlerShopífy(APIView):
     def post(self, request):
         print('\n**********************se recivió una notificación shopify******************************\n')
         data = request.data
+        print(data)
         return Response(data = data)
     
 class NotificationHandlerMeli(APIView):
-    
+
     def post(self, request):
         print('\n**********************se recivió una notificación meli******************************\n')
         data = request.data
+        print(data)
         return Response(data = data)
