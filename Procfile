@@ -1,1 +1,1 @@
-web: gunicorn pamo_back.wsgi
+web: gunicorn pamo_back.wsgi:application 
