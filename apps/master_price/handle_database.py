@@ -11,6 +11,7 @@ def update_or_create_main_product(product_json):
     vendor = product_json['vendor']
     status = product_json['status']
     variants = product_json['variants']
+    print(variants)
     category = product_json['category']['full_name']
     print('Parametros Variantes')
     for i in len(variants):
