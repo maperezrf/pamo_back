@@ -27,6 +27,7 @@ def update_or_create_main_product(product_json):
         object.barcode = variants[i]['barcode']
         object.inventory_quantity = variants[i]['inventory_quantity']
         # try:
+        print(response.json())
         object.costo = float(response.json()['productVariant']['unitCost']['amount'])
         # except:    
             # pass
