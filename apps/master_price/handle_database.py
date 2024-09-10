@@ -16,7 +16,7 @@ def update_or_create_main_product(product_json):
     for i in range(len(variants)):
         print(i)
         id_variant = str(variants[i]['id'])
-        response = con.request_graphql(GET_COST_PRODUCT.format(f'gid://shopify/ProductVariant/{id_variant}'))
+        response = con.request_graphql(GET_COST_PRODUCT.format( id=f'gid://shopify/ProductVariant/{id_variant}'))
         print(response)
         object, created = MainProducts.objects.get_or_create(variants[i]['id'])
         object.id_product = id_product
