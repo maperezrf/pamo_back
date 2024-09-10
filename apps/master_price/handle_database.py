@@ -13,7 +13,7 @@ def update_or_create_main_product(product_json):
     variants = product_json['variants']
     print(variants)
     category = product_json['category']['full_name']
-    for i in len(variants):
+    for i in range(len(variants)):
         print(variants[i]['id'])
         response = con.request_graphql(GET_COST_PRODUCT.format('gid://shopify/ProductVariant/' + variants[i]['id']))
         object, created = MainProducts.objects.get_or_create(variants[i]['id'])
