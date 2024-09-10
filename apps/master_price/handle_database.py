@@ -15,23 +15,23 @@ def update_or_create_main_product(product_json):
     category = product_json['category']['full_name']
     for i in range(len(variants)):
         print(i)
-        id_variant = str(variants[i]['id'])
+        id_variant = variants[i]['id']
         response = con.request_graphql(GET_COST_PRODUCT.format( id=f'gid://shopify/ProductVariant/{id_variant}'))
-        print(response)
-        object, created = MainProducts.objects.get_or_create(variants[i]['id'])
+        print(response.json())
+        object, created = MainProducts.objects.get_or_create(id_variant)
         object.id_product = id_product
         object.title = title
         object.tags = tags
         object.vendor = vendor
         object.status = status
-        object.id_variantShopi = variants[i]['id']
+        object.id_variantShopi = id_variant
         object.price = variants[i]['price']
         object.compare_at_price = variants[i]['compare_at_price']
         object.sku = variants[i]['sku']
         object.barcode = variants[i]['barcode']
         object.inventory_quantity = variants[i]['inventory_quantity']
         try:
-            object.costo = float(response['productVariant']['unitCost']['amount'])
+            object.costo = float(response.json()['productVariant']['unitCost']['amount'])
         except:    
             pass
         try:
