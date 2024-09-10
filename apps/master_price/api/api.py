@@ -9,7 +9,7 @@ from apps.master_price.connection_meli import connMeli
 from apps.master_price.models import ProductsMeli, MainProducts
 import json
 from unidecode import unidecode
-from apps.master_price.handle_database import update_or_create_main_product
+from apps.master_price.handle_database import update_or_create_main_product, delete_main_product
 
 class masterPriceAPIView(APIView):
 
@@ -70,7 +70,7 @@ class NotificationDeleteShopífy(APIView):
         print('\n**********************se recivió una notificación shopify******************************\n')
         data = request.data
         print(data)
-        update_or_create_main_product(data)
+        delete_main_product(data)
         return Response(data = data)
     
 class NotificationHandlerMeli(APIView):

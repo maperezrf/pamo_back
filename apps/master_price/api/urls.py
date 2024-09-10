@@ -6,5 +6,5 @@ urlpatterns = [
     path("oaut_meli", api.OAuthAPIView.as_view(), name="oaut_meli"),
     path("notification_update_shopi", api.NotificationHandlerShopífy.as_view(), name="wh_shopi"),
     path("notification_update_meli", api.NotificationHandlerMeli.as_view(), name="wh_meli"),
-    path("notification_delete_shopi", api.NotificationHandlerMeli.as_view(), name="wh_meli"),
+    path("notification_delete_shopi", api.NotificationDeleteShopífy.as_view(), name="wh_meli"),
 ]
