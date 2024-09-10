@@ -38,10 +38,10 @@ def update_or_create_main_product(product_json):
         object.save()
     
 def delete_main_product(product_json):
-    try:
-        item = MainProducts.objects.filter(id_variantShopi = product_json['id'] )
-        for i in item:
-            i.delete()
-    except:
-        pass
+    # try:
+    item = MainProducts.objects.filter(id_variantShopi = product_json['id'] )
+    for i in item:
+        i.delete()
+    # except:
+    #     pass
 
