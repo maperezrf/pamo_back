@@ -26,14 +26,10 @@ def update_or_create_main_product(product_json):
         object.sku = variants[i]['sku']
         object.barcode = variants[i]['barcode']
         object.inventory_quantity = variants[i]['inventory_quantity']
-        # try:
-        print(response.json())
-        object.costo = float(response.json()['productVariant']['unitCost']['amount'])
-        # except:    
-            # pass
-        # try:
-        object.image_link = product_json['images'][0]['src']
-        # except:
-            # pass
+        object.costo = float(response.json()['data']['productVariant']['inventoryItem']['unitCost']['amount'])
+        try:
+            object.image_link = product_json['images'][0]['src']
+        except:
+            pass
         object.category = category
         object.save()
