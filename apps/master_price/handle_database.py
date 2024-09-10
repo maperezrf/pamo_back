@@ -14,8 +14,8 @@ def update_or_create_main_product(product_json):
     category = product_json['category']['full_name']
     print('Parametros Variantes')
     for i in len(variants):
-        response = con.request_graphql(GET_COST_PRODUCT.format('gid://shopify/ProductVariant/' + i['id']))
-        object, created = MainProducts.objects.get_or_create(i['id'])
+        response = con.request_graphql(GET_COST_PRODUCT.format('gid://shopify/ProductVariant/' + variants[i]['id']))
+        object, created = MainProducts.objects.get_or_create(variants[i]['id'])
         object.id_product = id_product
         object.title = title
         object.tags = tags
