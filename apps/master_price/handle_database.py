@@ -3,7 +3,6 @@ from apps.master_price.conecctions_shopify import ConnectionsShopify
 from apps.master_price.graphiqL_queries import GET_COST_PRODUCT
 
 def update_or_create_main_product(product_json):
-    print('Parametros iniciales')
     con = ConnectionsShopify()
     id_product = product_json['id']
     title = product_json['title']
@@ -11,14 +10,10 @@ def update_or_create_main_product(product_json):
     vendor = product_json['vendor']
     status = product_json['status']
     variants = product_json['variants']
-    print(variants)
     category = product_json['category']['full_name']
     for i in range(len(variants)):
-        print(i)
         id_variant = variants[i]['id']
-        print(GET_COST_PRODUCT.format( id=f'gid://shopify/ProductVariant/{id_variant}'))
         response = con.request_graphql(GET_COST_PRODUCT.format( id=f'gid://shopify/ProductVariant/{id_variant}'))
-        print(response.json())
         object, created = MainProducts.objects.get_or_create(id_variantShopi = id_variant)
         object.id_product = id_product
         object.title = title
@@ -31,13 +26,13 @@ def update_or_create_main_product(product_json):
         object.sku = variants[i]['sku']
         object.barcode = variants[i]['barcode']
         object.inventory_quantity = variants[i]['inventory_quantity']
-        try:
-            object.costo = float(response.json()['productVariant']['unitCost']['amount'])
-        except:    
-            pass
-        try:
-            object.image_link = product_json['images'][0]['src']
-        except:
-            pass
+        # try:
+        object.costo = float(response.json()['productVariant']['unitCost']['amount'])
+        # except:    
+            # pass
+        # try:
+        object.image_link = product_json['images'][0]['src']
+        # except:
+            # pass
         object.category = category
         object.save()
