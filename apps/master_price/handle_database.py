@@ -13,7 +13,7 @@ def update_or_create_main_product(product_json):
     try:
         category = product_json['category']['full_name']
     except:
-        category = ''
+        category = 'Sin categoría'
     for i in range(len(variants)):
         id_variant = variants[i]['id']
         response = con.request_graphql(GET_COST_PRODUCT.format( id=f'gid://shopify/ProductVariant/{id_variant}'))
