@@ -10,7 +10,10 @@ def update_or_create_main_product(product_json):
     vendor = product_json['vendor']
     status = product_json['status']
     variants = product_json['variants']
-    category = product_json['category']['full_name']
+    try:
+        category = product_json['category']['full_name']
+    except:
+        category = ''
     for i in range(len(variants)):
         id_variant = variants[i]['id']
         response = con.request_graphql(GET_COST_PRODUCT.format( id=f'gid://shopify/ProductVariant/{id_variant}'))
@@ -38,10 +41,6 @@ def update_or_create_main_product(product_json):
         object.save()
     
 def delete_main_product(product_json):
-    print('con')
-    print(MainProducts.objects.filter(id_product = '9212662022421'))
-    print('sin')
-    print(MainProducts.objects.filter(id_product = 9212662022421))
     item = MainProducts.objects.filter(id_product = 9212662022421 )
     for i in item:
         i.delete()
