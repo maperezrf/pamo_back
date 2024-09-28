@@ -5,6 +5,10 @@ import json
 import os
 from datetime import datetime
 from pamo_back.queries  import GET_VARIANT_ID, GET_INVENTORY
+import time
+import json 
+from pamo_back.queries import REQUEST_FINISH_BULK, CREATION_BULK
+from apps.master_price.models import MainProducts, SopifyProducts
 
 
 
@@ -102,3 +106,51 @@ class ConnectionsShopify():
                 print(f'No se encontro el SKU: {df.iloc[i].sku}')
                 df.loc[i,'stock_shopyfi']= 'El SKU no se encontró'
         return df.loc[df['existencia'] != df['stock_shopyfi']]
+    
+    def get_all_products(self):
+        self.request_graphql(CREATION_BULK)
+        status = 'RUNNING'
+        while status == 'RUNNING':
+            response_bulk = self.request_graphql(REQUEST_FINISH_BULK)
+            status = response_bulk.json()['data']['currentBulkOperation']['status']
+            print(status)
+            if status == 'RUNNING':
+                time.sleep(30)
+        response_bulk.json()
+        file = requests.get(response_bulk.json()['data']['currentBulkOperation']['url'])
+        json_lines = file.text.strip().split('\n')
+        products = []
+        dic = {}
+        for line in json_lines:
+            data = json.loads(line)
+            if '__parentId' in data:
+                dic['id_product'] = data['__parentId']
+                if 'id' in data:
+                    dic['id_variantShopi'] = data['id']
+                    dic['price'] = data['price']
+                    dic['compare_at_price'] = data['compareAtPrice']
+                    dic['sku'] = data['sku']
+                    dic['cost'] = data['inventoryItem']['unitCost']['amount'] if data['inventoryItem']['unitCost'] else 0
+                elif 'src' in data:
+                    if 'image_link' not in dic:
+                        dic['image_link'] = data['src']
+            else:
+                products.append(dic)
+                dic = {}
+        for indice, product in enumerate(products[1:]):
+            try:
+                element, created = MainProducts.objects.get_or_create(id_product = product['id_product'], id_variantShopi = product['id_variantShopi'], sku = product['sku'] )
+            except Exception as e:
+                if "UNIQUE constraint failed" in str(e):
+                    element = MainProducts()
+                    element.id_product = product['id_product']
+                    element.id_variantShopi = product['id_variantShopi']
+                    element.sku = f'duplicidad sku:{product["sku"]} indice:{indice}'
+            element.cost = product['cost']
+            element.image_link = product['image_link'] if 'image_link' in product else 'sin imagen'
+            element.save()
+            item, relation_created  = SopifyProducts.objects.get_or_create(MainProducts = element)
+            item.price = product['price']
+            item.compare_at_price = product['compare_at_price']
+            item.save()
+        return products

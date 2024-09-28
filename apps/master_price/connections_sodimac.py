@@ -1,9 +1,11 @@
-from pamo.constants import *
+from pamo_back.constants import *
 import requests
 import pandas as pd
 import json
 from io import StringIO
-from pamo_bots.models import ProductsSodimac
+from apps.master_price.models import ProductsSodimac, MainProducts
+
+from django.db.models.functions import Length
 
 class ConnectionsSodimac():
 
@@ -70,6 +72,35 @@ class ConnectionsSodimac():
                 print(response)
                 data = {'success':True, "message":"Actializacion exitosa"}
             else:
+                data = {'success':False, "message":"No se encontró ningun producto con el Ean proporcionado"}
+        return data
+    
+
+
+    def set_inventory_all(self):
+        products = ProductsSodimac.objects.all()
+        # data = self.get_data_inventory(df)
+        skus_actualizados = []
+        sku_no_actualizados = []
+        for i in products:
+            response_get_inventory = self.request_inventory_api(i.ean)
+            if len(response_get_inventory) > 0 :
+                dic = {}
+                dic["proveedor"] = REFERENCIA_FPRN
+                dic["ean"] = i.ean
+                dic["inventarioDispo"] = i.main_product.inventory_quantity
+                dic["stockMinimo"] = 0
+                dic["canal"] = "Bogota"
+                dic["usuario"] = "Bot"
+                response = requests.post(URL_SET_INVENTARIO, headers = self.headers, json=dic).json()
+                print(response)
+                print(f"{i.main_product.sku}: Actializacion exitosa")
+                skus_actualizados.append(i.main_product.sku)
+                data = {'success':True, "message":"Actializacion exitosa"}
+            else:
+                print(response_get_inventory)
+                print(f"{i.main_product.sku}: Producto no encontrado")
+                sku_no_actualizados.append(i.main_product.sku)
                 data = {'success':False, "message":"No se encontró ningun producto con el Ean proporcionado"}
         return data
 
