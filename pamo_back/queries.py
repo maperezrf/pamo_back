@@ -305,7 +305,7 @@ GET_PRODUCTS_FULL = """{{
 CREATION_BULK = '''mutation {
   bulkOperationRunQuery(
     query: """
-              {
+          {
       products(first: 1) {
         pageInfo {
           hasNextPage
@@ -313,14 +313,23 @@ CREATION_BULK = '''mutation {
         }
         edges {
           node {
-            variants(first: 1000) {
+            id
+            tags
+            title
+            vendor
+            status
+            variants(first: 250) {
               edges {
                 node {
                   id
                   price
                   compareAtPrice
                   sku
+                  barcode
                   inventoryQuantity
+                  image {
+                    src
+                  }
                   inventoryItem {
                     unitCost {
                       amount
@@ -336,7 +345,9 @@ CREATION_BULK = '''mutation {
                 }
               }
             }
-            id
+            category {
+              fullName
+            }
           }
         }
       }

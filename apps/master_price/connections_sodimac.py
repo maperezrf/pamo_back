@@ -63,12 +63,13 @@ class ConnectionsSodimac():
                     pass    
         return pd.DataFrame(stock_list)
 
-    def set_inventory(self, df):
-        data = self.get_data_inventory(df)
+    def set_inventory(self, data):
+        data = self.get_data_inventory(data)
         for i in data:
             response_get_inventory = self.request_inventory_api(i['ean'])
             if len(response_get_inventory) > 0 :
-                response = requests.post(URL_SET_INVENTARIO, headers = self.headers, json=[i]).json()
+                print(i)
+                response = requests.post(URL_SET_INVENTARIO, headers = self.headers, json=i).json()
                 print(response)
                 data = {'success':True, "message":"Actializacion exitosa"}
             else:
@@ -104,15 +105,15 @@ class ConnectionsSodimac():
                 data = {'success':False, "message":"No se encontró ningun producto con el Ean proporcionado"}
         return data
 
-    def get_data_inventory(self, df):
+    def get_data_inventory(self, data):
         data_list = []
-        for i in range(df.shape[0]):
+        for i in (data):
             dic = {}
             dic["proveedor"] = REFERENCIA_FPRN
-            dic["ean"] = df.iloc[i].ean
-            dic["inventarioDispo"] = df.iloc[i].stock
+            dic["ean"] = i
+            dic["inventarioDispo"] = data[i]
             dic["stockMinimo"] = 0
-            dic["canal"] = "Bogota"
+            dic["canal"] = "Bodega MeloS"
             dic["usuario"] = "Bot"
             data_list.append(dic)
         return data_list

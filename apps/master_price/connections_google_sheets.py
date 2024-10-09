@@ -4,7 +4,7 @@ import json
 from oauth2client.service_account import ServiceAccountCredentials
 import pandas as pd
 
-class connection_google_sheets():
+class ConnectionsGoogleSheets():
 
     def __init__(self):
         scope = ['https://www.googleapis.com/auth/spreadsheets', 
@@ -21,10 +21,10 @@ class connection_google_sheets():
     def get_all_sheets(self, file):
         return file.worksheets()
     
-    def sheet_to_df(self, file, sheet_name):
-        worksheet = file.worksheet(sheet_name)
+    def sheet_to_df(self, file):
+        worksheet = file.worksheet(file.sheet1.title)
         data = worksheet.get_all_values()
-        return pd.DataFrame(data[2:], columns=data[1])
+        return pd.DataFrame(data[1:], columns=data[0])
 
     def delete_file(self, id):
         self.client.del_spreadsheet(id)

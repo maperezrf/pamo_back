@@ -13,7 +13,7 @@ def update(request):
     print(f'*** inicia actualizacion base productos {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}***')
     try:
         shopi = ConnectionsShopify()
-        products = shopi.get_all_products()
+        shopi.get_all_products()
         data = {'status': 'success'}
         print(f'*** inicia actualizacion base productos {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}***')
     except Exception as e:
@@ -77,6 +77,7 @@ def charge_data_sodi(request):
             cont += 1
         except Exception as e:
             listado_not_found.append(df.loc[i, 'sku_pamo'])
+            print(df.loc[i, 'sku_pamo'])
             print(e)
     try:
         data_to_save = [ProductsSodimac(**elemento) for elemento in listado]
@@ -85,8 +86,19 @@ def charge_data_sodi(request):
     except Exception as e:
         print(e)
         data = {'status': 'fail'}
-    data={}
     return JsonResponse(data)
 
-def test():
-    pass
+def set_all_inventory_sodimac(request):
+    print(f'*** inicia seteo stock sodimac {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}***')
+    try:
+        products = ProductsSodimac.objects.all() 
+        data = {i.ean: i.main_product.inventory_quantity for i in products}
+        con = ConnectionsSodimac()
+        con.set_inventory(data)
+        data = {'status': 'success'}
+    except Exception as e:
+        print(e)
+        data = {'status': 'fail'}
+    print(f'*** Finaliza seteo stock sodimac {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}***')
+    return JsonResponse (data)
+    

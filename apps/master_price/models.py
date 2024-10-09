@@ -7,7 +7,7 @@ import ast
 
 class MainProducts(models.Model):
     id_variantShopi = models.CharField(max_length=300, null=False, blank=False, primary_key=True)
-    id_product = models.CharField(max_length=20, null=False, blank=False) 
+    id_product = models.CharField(max_length=300, null=False, blank=False) 
     sku = models.CharField(max_length=100, null=True, blank=True, unique=True)
     cost = models.FloatField(null=True, blank=True, default=0)
     utility = models.FloatField(null=True, blank=True, default=0)
@@ -18,22 +18,21 @@ class MainProducts(models.Model):
     packaging_cost = models.IntegerField(null=True, blank=True, default=0)
     price_base = models.IntegerField(null=True, blank=True, default=0)
     image_link = models.CharField(max_length=500, null=True, blank=True)
+    title = models.CharField(max_length=300, null=True, blank=True)
+    inventory_quantity = models.IntegerField(null=True, blank=True ,default= 0)
 
 class SopifyProducts(models.Model):
     MainProducts = models.ForeignKey(MainProducts, verbose_name = 'main_product', on_delete=models.CASCADE, null=True, blank=True)
-    # title = models.CharField(max_length=300, null=True, blank=True)
-    # tags = models.CharField(max_length=500, null=True, blank=True)
-    # vendor = models.CharField(max_length=100, null=True, blank=True)
-    # status = models.CharField(max_length=100, null=True, blank=True)
+    tags = models.CharField(max_length=500, null=True, blank=True)
+    vendor = models.CharField(max_length=100, null=True, blank=True)
+    status = models.CharField(max_length=100, null=True, blank=True)
     price = models.FloatField(null=True, blank=True, default=0)
     compare_at_price =models.FloatField(null=True, blank=True, default=0)
-    # barcode = models.CharField(max_length=100, null=True, blank=True)
-    # inventory_quantity = models.IntegerField(null=True, blank=True ,default= 0)
-    # cursor = models.CharField(max_length=80, null=True, blank=True)
+    barcode = models.CharField(max_length=100, null=True, blank=True)
+    cursor = models.CharField(max_length=80, null=True, blank=True)
     margen_comparacion_db = models.FloatField(null=True, blank=True, default=0)
     commission_platform = models.FloatField(null=True, blank=True, default=0)
-    
-    # category = models.CharField(max_length=500, null=True, blank=True)
+    category = models.CharField(max_length=500, null=True, blank=True)
 
 
     def __str__(self) -> str:
@@ -56,19 +55,6 @@ class ProductsMeli(models.Model):
     shipment_cost = models.FloatField(null=True, blank=True, default=0)
     link = models.CharField(max_length=300, null=True, blank=True)
 
-# class PriceEngine(models.Model):
-#     main_product = models.ForeignKey(MainProducts, verbose_name = 'main_product', on_delete=models.CASCADE, null=True, blank=True)
-#     margen = models.FloatField(null=True, blank=True, default=0)
-#     commission_seller = models.FloatField(null=True, blank=True, default=0)
-#     commission_platform = models.FloatField(null=True, blank=True, default=0)
-#     shipping = models.FloatField(null=True, blank=True, default=0)
-#     publicity = models.FloatField(null=True, blank=True, default=0)
-#     aditional = models.FloatField(null=True, blank=True, default=0)
-
-# class packaging_cost(models.Model):
-#     base_cost = models.FloatField(null=True, blank=True, default=0)
-#     piece_cost = models.FloatField(null=True, blank=True, default=0)
-
 class OAuthToken(models.Model):
     access_token = models.TextField()
     refresh_token = models.TextField()
@@ -86,7 +72,6 @@ class OAuthToken(models.Model):
             raise TypeError("El token debe ser una cadena de texto")
 
     def decrypt_token(self, encrypted_token):
-        # Asegúrate de que encrypted_token es de tipo bytes
         if isinstance(encrypted_token, bytes):
             return self.cipher_suite.decrypt(encrypted_token).decode()
         else:
