@@ -106,37 +106,40 @@ GET_DRAFT_ORDER_UPDATE = """
 
 GET_PRODUCTS ="""
 {{
-   products(first: 249 {cursor})  {{
-      pageInfo {{
+  products(first: 249 {cursor}) {{
+    pageInfo {{
       hasNextPage
       endCursor
-      }}
-      edges {{
-        node {{
-          id
-        	tags
-          title
-          vendor
-          status
-          variants(first: 250) {{
-            edges {{
-              node {{
-                id
-                price
-                compareAtPrice
-                sku
-                barcode
-                inventoryQuantity
-                  image {{
+    }}
+    edges {{
+      node {{
+        id
+        tags
+        title
+        vendor
+        status
+        variants(first: 250) {{
+          edges {{
+            node {{
+              id
+              price
+              compareAtPrice
+              sku
+              barcode
+              inventoryQuantity
+              image {{
                 src
               }}
             }}
           }}
         }}
-          images(first: 1) {{
+        images(first: 1) {{
           nodes {{
             src
           }}
+        }}
+        category {{
+          fullName
         }}
       }}
     }}
@@ -297,3 +300,78 @@ GET_PRODUCTS_FULL = """{{
     }}
   }}
 }}"""
+
+
+CREATION_BULK = '''mutation {
+  bulkOperationRunQuery(
+    query: """
+          {
+      products(first: 1) {
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        edges {
+          node {
+            id
+            tags
+            title
+            vendor
+            status
+            variants(first: 250) {
+              edges {
+                node {
+                  id
+                  price
+                  compareAtPrice
+                  sku
+                  barcode
+                  inventoryQuantity
+                  image {
+                    src
+                  }
+                  inventoryItem {
+                    unitCost {
+                      amount
+                    }
+                  }
+                }
+              }
+            }
+            images(first: 1) {
+              edges {
+                node {
+                  src
+                }
+              }
+            }
+            category {
+              fullName
+            }
+          }
+        }
+      }
+    }
+    """
+  ) {
+    bulkOperation {
+      id
+      status
+    }
+    userErrors {
+      field
+      message
+    }
+  }
+}'''
+
+REQUEST_FINISH_BULK = """{
+  currentBulkOperation {
+    id
+    status
+    errorCode
+    createdAt
+    completedAt
+    url
+  }
+}"""

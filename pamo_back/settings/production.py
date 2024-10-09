@@ -1,7 +1,7 @@
 from .base import *
 from decouple import config
 
-print('\n\n\n*********************************produccion**********************\n\n\n\n')
+print('\n\n\n*********************************PRODUCCION**********************\n\n\n\n')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', cast=bool)
