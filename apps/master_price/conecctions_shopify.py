@@ -148,7 +148,15 @@ class ConnectionsShopify():
                         element.id_variantShopi = i['id']
                         element.sku = f'duplicidad sku:{i["sku"]} indice:{index}'
                         element.title = product['product_id']['title']
+                element.utility = 18
+                element.items_number = 1
+                element.commission_seller = 2
+                element.publicity = 2
                 element.cost = i['inventoryItem']['unitCost']['amount'] if  i['inventoryItem']['unitCost'] else 0
+                element.packaging_cost = (2765 + ((element.items_number-1)*623))
+                utility = (float(element.cost) / (100-element.utility) * 100)
+                utility_packaging_cost = utility + element.packaging_cost
+                element.price_base = ((utility_packaging_cost/(100-element.commission_seller)*100)/(100-element.publicity)*100)
                 element.image_link = product['image']['src'] if 'image_link' in product else 'sin imagen'
                 element.inventory_quantity = i['inventoryQuantity']
                 element.save()
@@ -156,8 +164,14 @@ class ConnectionsShopify():
                 item.tags = product['product_id']['tags']
                 item.vendor = product['product_id']['vendor']
                 item.status = product['product_id']['status']
-                item.price = i['price']
+                item.real_price = i['price']
                 item.compare_at_price = i['compareAtPrice']
                 item.barcode = i['barcode']
                 item.category = product['product_id']['category']['fullName'] if product['product_id']['category'] else 'Sin Categoria'
+                item.commission_platform = 18
+                item.margen_comparacion_db = 7
+                price_whitout_shipment = (element.price_base/(100-item.commission_platform)*100)
+                item.shipment_cost = 0 if price_whitout_shipment < 100000 else 7000
+                item.projected_price = round(price_whitout_shipment + item.shipment_cost )
+                item.projected_compare_at_price = round(item.projected_price / (item.margen_comparacion_db / 100))
                 item.save()
