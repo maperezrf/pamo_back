@@ -11,7 +11,7 @@ class MainProducts(models.Model):
     sku = models.CharField(max_length=100, null=True, blank=True, unique=True)
     cost = models.FloatField(null=True, blank=True, default=0)
     utility = models.FloatField(null=True, blank=True, default=0)
-    items_number = models.IntegerField(default=0, null=False, blank=False)
+    items_number = models.IntegerField(default=1, null=False, blank=False)
     commission_seller = models.FloatField(null=True, blank=True, default=0)
     publicity = models.FloatField(null=True, blank=True, default=0)
     aditional = models.FloatField(null=True, blank=True, default=0)
@@ -26,13 +26,16 @@ class SopifyProducts(models.Model):
     tags = models.CharField(max_length=500, null=True, blank=True)
     vendor = models.CharField(max_length=100, null=True, blank=True)
     status = models.CharField(max_length=100, null=True, blank=True)
-    price = models.FloatField(null=True, blank=True, default=0)
-    compare_at_price =models.FloatField(null=True, blank=True, default=0)
+    real_price = models.FloatField(null=True, blank=True, default=0)
+    compare_at_price = models.FloatField(null=True, blank=True, default=0)
     barcode = models.CharField(max_length=100, null=True, blank=True)
     cursor = models.CharField(max_length=80, null=True, blank=True)
     margen_comparacion_db = models.FloatField(null=True, blank=True, default=0)
     commission_platform = models.FloatField(null=True, blank=True, default=0)
     category = models.CharField(max_length=500, null=True, blank=True)
+    projected_price = models.FloatField(null=True, blank=True, default=0)
+    projected_compare_at_price = models.FloatField(null=True, blank=True, default=0)
+    shipment_cost = models.FloatField(null=True, blank=True, default=0)
 
 
     def __str__(self) -> str:
@@ -54,6 +57,7 @@ class ProductsMeli(models.Model):
     crossed_out_price = models.FloatField(null=True, blank=True, default=0)    
     shipment_cost = models.FloatField(null=True, blank=True, default=0)
     link = models.CharField(max_length=300, null=True, blank=True)
+    projected_price = models.FloatField(null=True, blank=True, default=0)
 
 class OAuthToken(models.Model):
     access_token = models.TextField()

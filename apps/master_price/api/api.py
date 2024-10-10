@@ -39,14 +39,20 @@ class OAuthAPIView(APIView):
                     item_main, create = MainProducts.objects.get_or_create(sku=item.sku) if item.sku else (0, True)
                     if not create:
                         item.main_product =  item_main
+                    item.commission = 18
                     item.pricePublication = publicacion['price']
                     item.crossed_out_price = publicacion['original_price']
-                    item.free_shipping = publicacion['shipping']['free_shipping']
                     item.link = publicacion['permalink']
-                    item.local_pick_up = publicacion['shipping']['local_pick_up']
-                    item.store_pick_up = publicacion['shipping']['store_pick_up']
-                    item.logistic_type = publicacion['shipping']['logistic_type']
-                    item.weight = json.dumps([i for i in publicacion['attributes'] if (i['id'] == 'WEIGHT') | (i['id'] == 'PACKAGE_WEIGHT')])
+                    price_whitout_shipped = (item_main.price_base/(100- item.commission)*100)
+                    if (price_whitout_shipped < 3000):
+                        commission_aditional = 2500
+                    elif (price_whitout_shipped >= 30000) & (price_whitout_shipped <= 60000) :
+                        commission_aditional = 4000
+                    else:
+                        commission_aditional = 0
+                    price_comissions = price_whitout_shipped + commission_aditional
+                    item.shipment_cost if price_comissions < 60000 else 0
+                    item.projected_price = round(price_comissions + item.shipment_cost)
                     item.save()
             except Exception as e:
                 products_not_found.append(publicacion)
