@@ -1,8 +1,7 @@
 name: bot sodimac
 
 on:
-  schedule:
-    - cron: '0 5,9,14 * * *'
+  workflow_dispatch:
 
 jobs:
   build:
