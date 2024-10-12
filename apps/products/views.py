@@ -97,6 +97,7 @@ def set_all_inventory_sodimac(request):
     except Exception as e:
         print(e)
         data = {'status': 'fail'}
+    print(data)
     print(f'*** Finaliza seteo stock sodimac {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}***')
     return JsonResponse (data)
     
