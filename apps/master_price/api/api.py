@@ -3,20 +3,20 @@ from apps.master_price.models import *
 from rest_framework.response import Response
 from rest_framework import status 
 from apps.master_price.core import *
-from pamo_back.constants import COLUMNS_ALL_PRODUCTS, COLUMNS_COUNT_RELATIONS
-from apps.master_price.models import OAuthToken
+from pamo_back.constants import COLUMNS_SHOPIFY
 from apps.master_price.connection_meli import connMeli
-from apps.master_price.models import ProductsMeli, MainProducts
 from apps.master_price.connections_google_sheets import ConnectionsGoogleSheets
 import json
 from unidecode import unidecode
 from apps.master_price.handle_database import update_or_create_main_product, delete_main_product
+from pamo_back.queries import *
+from apps.master_price.conecctions_shopify import ConnectionsShopify
 
 class masterPriceAPIView(APIView):
 
     def get(self, request):
-        query = read_sql('get_all_products')
-        results = execute_query(query, COLUMNS_ALL_PRODUCTS )
+        query = read_sql('get_shopify_products')
+        results = execute_query(query, COLUMNS_SHOPIFY )
         return Response( data = results, status=status.HTTP_200_OK)
 
 class OAuthAPIView(APIView):  
@@ -105,12 +105,13 @@ class ConnectionSheets(APIView):
         conn = ConnectionsGoogleSheets()
         file = conn.read_file(id)
         sheets = conn.get_all_sheets(file)
+        sheets_dic =[{'name':i.title, 'id':i.id} for i in  sheets]
         df = conn.sheet_to_df(file)
         df = df[[i for i in df.columns if i != '']]
         df = df.loc[(df['sku'] != '')].reset_index(drop=True)
         table = df.to_dict(orient='records')
         title = file.title
-        data = {'table': table, 'title': title, 'columns':df.columns, 'sheets':sheets}
+        data = {'table': table, 'title': title, 'columns':df.columns, 'sheets':sheets_dic}
         return Response( data = data, status=status.HTTP_200_OK)
     
     def get_all_files(self):
@@ -118,3 +119,129 @@ class ConnectionSheets(APIView):
         files = json.dumps([{'title':i.title, 'id':i.id, 'url':i.url, 'last_update_time':i.lastUpdateTime } for i in conn.get_list_file()])
         return files
         
+
+class ConnectionShopify(APIView):
+
+    def get(self, request):
+        self.send_data_shopify()
+        return Response( status=status.HTTP_200_OK)
+
+    def post(self, request):
+        data = request.data
+    
+    def send_data_shopify(self):
+        # TODO Se debe agregar el inventoryLevelId a la base de datos para actualizar los stocks
+        file = pd.read_excel('')
+        file.rename(columns={'titulo':'title', 'costo':'cost', 'stock':'inventory_quantity', 'proveedor':'vendor', 'estado':'status', 'categoria':'category', 'codigo de barras':'barcode'}, inplace=True)
+        columns = [i for i in file.columns if i in ['sku','title','cost','inventory_quantity','vendor','status','category','barcode']]
+        novelty_list=[]
+        list_items=[]
+        for index, row in file.iterrows():
+            try:
+                item = SopifyProducts.objects.get(MainProducts__sku = row['sku'])
+                if 'title' in columns:
+                    item.MainProducts.title = row.title
+                if 'cost' in columns:
+                    item.MainProducts.cost = int(round(row.cost))
+                if 'inventory_quantity' in columns:
+                    item.MainProducts.inventory_quantity = row.inventory_quantity
+                if 'tags' in columns:
+                    item.tags = row.tags
+                if 'vendor' in columns:
+                    item.vendor = row.provevendoredor
+                if 'status' in columns:
+                    item.status = row.status
+                if 'category' in columns:
+                    item.category = row.category
+                if 'barcode' in columns:
+                    item.barcode = row.barcode
+                item.MainProducts.save()
+                item.save()
+                list_items.append(row['sku'])
+            except Exception as e:
+                if 'SopifyProducts matching query does not exist' in str(e):
+                    dic_novelty = {}
+                    dic_novelty['sku'] = row.sku
+                    dic_novelty['novedad'] = 'sku no encontrado'
+                    novelty_list.append(dic_novelty)
+                else:
+                    raise e
+        pd.DataFrame(novelty_list).to_excel('C:/Users/USUARIO/Desktop/pamo/pamo_back/apps/master_price/media/novedades.xlsx', index=False)
+        main_products = MainProducts.objects.filter(sku__in = list_items)
+        main_products_df = pd.DataFrame(main_products.values())
+        items = SopifyProducts.objects.filter(MainProducts__sku__in = list_items)
+        df_items_df = pd.DataFrame(items.values())
+        merge = main_products_df.merge(df_items_df, how='left',right_on='MainProducts_id', left_on='id_variantShopi' )
+        columns = list(columns)
+        columns.extend(['id_variantShopi', 'id_product', 'projected_price', 'projected_compare_at_price'])
+        self.set_variables( merge[columns])
+        return merge[columns]
+    
+
+
+    def set_variables(self, df):
+        print('seteando variables')
+        variables = []
+        columns = df.columns
+        for index, row in df.iterrows():
+            variants = {'id':row.id_variantShopi}
+            # variants['sku'] = row.sku
+            product = {'id':row.id_product}
+            # inventory = {'inventoryLevelId':self.df_rev.loc[i]['inventorylevelsid']}
+            if 'title' in columns:
+                product['title'] = row.title
+            if 'vendor' in columns:
+                product['vendor'] = row.vendor
+            if 'status' in columns:
+                product['status'] = 'ACTIVE' if str(row.status) == '1' else 'DRAFT'
+            if 'tags' in columns:
+                tags_archive= row.tags.strip(',').split(',')
+                tags_shopi = row.tags_shopi
+                tags_new = [i.upper() for i in [i.lower().strip() for i in tags_archive] if i not in [j.lower().strip() for j in tags_shopi ]]
+                tags_shopi.extend(tags_new)
+                product['tags'] = tags_shopi
+                if 'PAUSADO' in product['tags']:
+                    variants['inventoryPolicy'] = 'DENY'
+            if 'barcode' in columns:
+                variants['barcode'] = row.barcode
+            if 'projected_compare_at_price' in columns:
+                variants['compareAtPrice'] = row.projected_compare_at_price
+            if 'projected_price' in columns:
+                variants['price'] = row.projected_price
+            if 'cost' in columns:
+                variants["inventoryItem"]={'cost':str(row.cost)}
+            # try:
+            #     inventory["availableDelta"] = int(self.df_rev.loc[i]['stock']) - int(self.df_rev.loc[i]['inventoryquantity_shopi'])
+            # except:
+            #     pass
+
+            var ={}
+            if any([True for i in ['title','vendor','status','tags'] if i in product]):
+                var['productInput'] = product
+            if any([True for i in ['sku','barcode','compareAtPrice','price','inventoryItem'] if i in variants ]):
+                var['variantInput'] = variants
+            # if 'availableDelta' in inventory:
+            #     var['inventoryAdjustInput'] = inventory
+            variables.append(var)
+
+        # TODO refactorizar de aqui, se hace el envio a Shopify
+        shopi = ConnectionsShopify()
+        for index, variable in enumerate(variables):
+            print(len(variables)-index)
+            product_var = product_hql = variant_var = variant_hql = inventory_var = inventory_hql = ''
+            if "productInput" in variable :
+                product_var = "$productInput: ProductInput!,"
+                product_hql = UPTADE_PRODUCT
+            if "variantInput" in variable:
+                variant_var = '$variantInput: ProductVariantInput!,'
+                variant_hql = PRODUCT_VARIANT_UPDATE
+            if "inventoryAdjustInput" in variable:
+                inventory_var = '$inventoryAdjustInput: InventoryAdjustQuantityInput!,'
+                inventory_hql = INVENTORY_ADJUST
+            query = UPDATE_QUERY.format(productInput = product_var, variantInput = variant_var, inventoryAdjustInput = inventory_var, productUpdateq = product_hql, productVariantUpdateq = variant_hql, inventoryAdjustQuantity = inventory_hql)
+            res = shopi.request_graphql(query, variable)
+            if 'errors' in  [i for i in res.json()]:
+                print(f'error {row.sku}' )
+            else:
+                print('ok')
+        return variables

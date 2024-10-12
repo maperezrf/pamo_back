@@ -9,4 +9,5 @@ urlpatterns = [
     path("notification_delete_shopi/", api.NotificationDeleteShopífy.as_view(), name="wh_delete_shopi"),
     path("connection_sheets/<str:process>/", api.ConnectionSheets.as_view(), name= "conn_sheets"),
     path("connection_sheets/", api.ConnectionSheets.as_view(), name= "conn_sheets"),
+    path("connection_shopify/", api.ConnectionShopify.as_view(), name= "conn_shopi"),
 ]
