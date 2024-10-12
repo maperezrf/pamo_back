@@ -29,8 +29,15 @@ COLUMNS_SHOPI = ['N/A','Codigo barras','Costo','Precio','Precio comparación','P
 COLUMNS_ALL_PRODUCTS = ["id_variantShopi", "id_product", "title", "tags", "vendor", "status", "price", "compare_at_price", "sku", "barcode", "inventory_quantity", "cursor", "costo", "margen_comparacion_db", "kit", "image_link", "category", "items_number","margen", "commission_seller", "commission_platform", "shipping", "publicity", "aditional"]
 COLUMNS_COUNT_RELATIONS = ["id_variantShopi", "id_product", "title", "tags", "vendor", "status", "price", "compare_at_price", "sku", "barcode", "inventory_quantity", "cursor", "margen", "costo", "margen_comparacion_db", "kit", "image_link",'relation_sodi', 'relation_meli']
 
+COLUMNS_SHOPIFY =  ['id_variantShopi', 'id_product', 'sku', 'cost', 'utility', 'items_number', 'commission_seller', 'publicity', 'aditional', 'packaging_cost', 'price_base', 'image_link', 'title', 'inventory_quantity', 'tags', 'vendor', 'status', 'real_price', 'compare_at_price', 'barcode', 'margen_comparacion_db', 'commission_platform', 'category', 'projected_price', 'projected_compare_at_price', 'shipment_cost' ]
+
+
+
 APP_ID = config('APP_ID')
 CLIENT_SECRET = config('CLIENT_SECRET')
 URL_REDIRECT = config('URL_REDIRECT')
 URL_GET_TOKEN = config('URL_GET_TOKEN')
 USER_ID = config('USER_ID')
+
+
+	

@@ -148,15 +148,8 @@ class ConnectionsShopify():
                         element.id_variantShopi = i['id']
                         element.sku = f'duplicidad sku:{i["sku"]} indice:{index}'
                         element.title = product['product_id']['title']
-                element.utility = 18
-                element.items_number = 1
-                element.commission_seller = 2
-                element.publicity = 2
                 element.cost = i['inventoryItem']['unitCost']['amount'] if  i['inventoryItem']['unitCost'] else 0
                 element.packaging_cost = (2765 + ((element.items_number-1)*623))
-                utility = (float(element.cost) / (100-element.utility) * 100)
-                utility_packaging_cost = utility + element.packaging_cost
-                element.price_base = ((utility_packaging_cost/(100-element.commission_seller)*100)/(100-element.publicity)*100)
                 element.image_link = product['image']['src'] if 'image_link' in product else 'sin imagen'
                 element.inventory_quantity = i['inventoryQuantity']
                 element.save()
@@ -168,10 +161,22 @@ class ConnectionsShopify():
                 item.compare_at_price = i['compareAtPrice']
                 item.barcode = i['barcode']
                 item.category = product['product_id']['category']['fullName'] if product['product_id']['category'] else 'Sin Categoria'
-                item.commission_platform = 18
-                item.margen_comparacion_db = 7
-                price_whitout_shipment = (element.price_base/(100-item.commission_platform)*100)
-                item.shipment_cost = 0 if price_whitout_shipment < 100000 else 7000
-                item.projected_price = round(price_whitout_shipment + item.shipment_cost )
-                item.projected_compare_at_price = round(item.projected_price / (item.margen_comparacion_db / 100))
                 item.save()
+
+
+
+
+
+    # <option value="N/A" selected="">N/A</option>
+    # <option value="Codigo barras">Codigo barras</option>
+    # <option value="Costo">Costo</option>
+    # <option value="Estado publicación">Estado publicación</option>
+    # <option value="Margen">Margen</option>
+    # <option value="Margen comparación">Margen comparación</option>
+    # <option value="Precio">Precio</option>
+    # <option value="Precio comparación">Precio comparación</option>
+    # <option value="Proveedor">Proveedor</option>
+    # <option value="SKU">SKU</option>
+    # <option value="Stock">Stock</option>
+    # <option value="Tags">Tags</option>
+    # <option value="Titulo">Titulo</option

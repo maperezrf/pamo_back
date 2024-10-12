@@ -44,4 +44,3 @@ def delete_main_product(product_json):
     item = MainProducts.objects.filter(id_product = 9212662022421 )
     for i in item:
         i.delete()
-

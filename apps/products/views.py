@@ -36,7 +36,7 @@ def charge_data_meli(request):
     for i in range(df.shape[0]):
         dic = {}
         id = df.loc[i, 'main_product_id']
-        dic['main_product'] = MainProducts.objects.get(id_variantShopi = id)
+        dic['MainProducts'] = MainProducts.objects.get(id_variantShopi = id)
         dic['publication'] = df.loc[i, 'publication']
         dic['taxes'] = df.loc[i, 'taxes']
         dic['margen'] = df.loc[i, 'margen']
@@ -59,30 +59,28 @@ def charge_data_sodi(request):
     # con = ConnectionsSodimac()
     # con.set_inventory_all()
     
-    df = pd.read_csv('C:/Users/USUARIO/Downloads/SKU SODIMAC EAN (2).csv', sep=';')
-    listado_not_found = []
-    listado = []
-    cont = 0
-    for i in range(df.shape[0]):
-        try:
-            dic = {}
-            id = cont
-            dic['main_product'] = MainProducts.objects.get(sku = df.loc[i, 'sku_pamo'])
-            dic['publication'] = df.loc[i, 'sku_sodimac']
-            dic['ean'] = df.loc[i, 'ean']
-            # dic['ean'] = df.loc[i, 'ean']
-            # dic['stock'] = df.loc[i, 'stock']
-            # dic['stock_sodi'] = df.loc[i, 'stock_sodi']
-            listado.append(dic)
-            cont += 1
-        except Exception as e:
-            listado_not_found.append(df.loc[i, 'sku_pamo'])
-            print(df.loc[i, 'sku_pamo'])
-            print(e)
     try:
-        data_to_save = [ProductsSodimac(**elemento) for elemento in listado]
-        ProductsSodimac.objects.bulk_create(data_to_save)
         data = {'status': 'success'}
+        df = pd.read_csv('C:/Users/USUARIO/Downloads/SKU SODIMAC EAN (2).csv', sep=';')
+        listado_not_found = []
+        listado = []
+        cont = 0
+        for index, row in df.iterrows():
+            try:
+                item = ProductsSodimac()
+                item.MainProducts = MainProducts.objects.get(sku = row.sku_pamo)
+                item.publication = row.sku_sodimac
+                item.ean = row.ean
+                item.save()
+            except Exception as e:
+                if 'MainProducts matching query does not exist.' in str(e):
+                    listado_not_found.append(row.sku_pamo)
+                    print(row.sku_pamo)
+                    print(e)
+                elif 'UNIQUE constraint failed' in str(e):
+                    print(e)
+                else:
+                    raise e 
     except Exception as e:
         print(e)
         data = {'status': 'fail'}
@@ -92,7 +90,7 @@ def set_all_inventory_sodimac(request):
     print(f'*** inicia seteo stock sodimac {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}***')
     try:
         products = ProductsSodimac.objects.all() 
-        data = {i.ean: i.main_product.inventory_quantity for i in products}
+        data = {i.ean: i.MainProducts.inventory_quantity for i in products}
         con = ConnectionsSodimac()
         con.set_inventory(data)
         data = {'status': 'success'}
