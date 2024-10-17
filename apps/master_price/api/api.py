@@ -79,8 +79,8 @@ class NotificationHandlerShopífy(APIView):
 
 class NotificationCreateOrderShopify(APIView):
         
-        def get(self, request):
-            print('\n**********************se recivió una notificación shopify******************************\n')
+        def post(self, request):
+            print('\n********************** Orden creada shopify ******************************\n')
             data = request.data
             print(data)
             if data['customer']['first_name'] == 'SODIMAC COLOMBIA S A':
