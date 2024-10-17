@@ -23,8 +23,8 @@ class connMelonn:
             "holdFulfillmentAfterProcessing": False,
             "shipping": {
                 "fullName": data['customer']['default_address']['name'],
-                "addressL1": "Av. Kentucky 1234",
-                "addressL2": "optional to complete the address",
+                "addressL1": data['customer']['default_address']['address1'],
+                "addressL2": data['customer']['default_address']['address2'],
                 "city": data['customer']['default_address']['city'],
                 "region": data['customer']['default_address']['city'],
                 "country": data['customer']['default_address']['country'],
