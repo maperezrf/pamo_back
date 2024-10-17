@@ -1,4 +1,6 @@
 from rest_framework.views import APIView
+import json
+from unidecode import unidecode
 from apps.master_price.models import *
 from rest_framework.response import Response
 from rest_framework import status 
@@ -6,11 +8,12 @@ from apps.master_price.core import *
 from pamo_back.constants import COLUMNS_SHOPIFY
 from apps.master_price.connection_meli import connMeli
 from apps.master_price.connections_google_sheets import ConnectionsGoogleSheets
-import json
-from unidecode import unidecode
+from apps.master_price.conecctions_shopify import ConnectionsShopify
+from apps.master_price.connection_meli import connMeli
+from apps.master_price.connections_melonn import connMelonn
 from apps.master_price.handle_database import update_or_create_main_product, delete_main_product
 from pamo_back.queries import *
-from apps.master_price.conecctions_shopify import ConnectionsShopify
+
 
 class masterPriceAPIView(APIView):
 
@@ -73,7 +76,22 @@ class NotificationHandlerShopífy(APIView):
         print(data)
         update_or_create_main_product(data)
         return Response(data = data)
-    
+
+class NotificationCreateOrderShopify(APIView):
+        
+        def get(self, request):
+            print('\n**********************se recivió una notificación shopify******************************\n')
+            data = request.data
+            print(data)
+            if data['customer']['first_name'] == 'SODIMAC COLOMBIA S A':
+                con = connMelonn()
+                con.create_data(data)
+                response = con.create_order()
+                if response['statusCode'] == 201:
+                    return Response( data = {'message':'success'}, status=status.HTTP_200_OK)
+                else:
+                    return Response( data = {'message':response['message']}, status=response['statusCode'])
+
 class NotificationDeleteShopífy(APIView):
     
     def post(self, request):
@@ -131,7 +149,7 @@ class ConnectionShopify(APIView):
     
     def send_data_shopify(self):
         # TODO Se debe agregar el inventoryLevelId a la base de datos para actualizar los stocks
-        file = pd.read_excel('')
+        file = pd.read_excel('C:/Users/USUARIO/Downloads/CATALOGO IMPORTADORA BARU SAS 2009.xlsx')
         file.rename(columns={'titulo':'title', 'costo':'cost', 'stock':'inventory_quantity', 'proveedor':'vendor', 'estado':'status', 'categoria':'category', 'codigo de barras':'barcode'}, inplace=True)
         columns = [i for i in file.columns if i in ['sku','title','cost','inventory_quantity','vendor','status','category','barcode']]
         novelty_list=[]
