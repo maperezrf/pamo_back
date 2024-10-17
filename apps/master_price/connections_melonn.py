@@ -25,9 +25,9 @@ class connMelonn:
                 "fullName": data['customer']['default_address']['name'],
                 "addressL1": data['customer']['default_address']['address1'],
                 "addressL2": data['customer']['default_address']['address2'],
-                "city": data['customer']['default_address']['city'],
-                "region": data['customer']['default_address']['city'],
-                "country": data['customer']['default_address']['country'],
+                "city": 'BOGOTÁ, D.C.',
+                "region": 'BOGOTÁ, D.C.',
+                "country": 'Colombia',
                 "postalCode": "00000",
                 "phoneNumber": data['customer']['default_address']['phone']
             },
