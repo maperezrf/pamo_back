@@ -1,6 +1,7 @@
 from rest_framework.views import APIView
 import json
 from unidecode import unidecode
+from django.http import JsonResponse
 from apps.master_price.models import *
 from rest_framework.response import Response
 from rest_framework import status 
@@ -87,10 +88,11 @@ class NotificationCreateOrderShopify(APIView):
                 con = connMelonn()
                 con.create_data(data)
                 response = con.create_order()
+                print(response)
                 if response['statusCode'] == 201:
-                    return Response( data = {'message':'success'}, status=status.HTTP_200_OK)
+                    return  JsonResponse( data = {'message':'success'}, status=status.HTTP_200_OK)
                 else:
-                    return Response( data = {'message':response['message']}, status=response['statusCode'])
+                    return JsonResponse( data = {'message':response['message']}, status=response['statusCode'])
 
 class NotificationDeleteShopífy(APIView):
     
