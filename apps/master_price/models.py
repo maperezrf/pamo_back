@@ -59,9 +59,9 @@ class SopifyProducts(models.Model):
         return self.sku if self.sku else ''
     
     def save(self, *args, **kwargs) -> None:
-        if self.commission_platform == None:
+        if (self.commission_platform == None) | (self.commission_platform == 0):
             self.commission_platform = 18
-        if self.margen_comparacion_db == None:
+        if (self.margen_comparacion_db == None) | (self.margen_comparacion_db == 0):
             self.margen_comparacion_db = 7
         if self.MainProducts.price_base != 0:
             price_whitout_shipment = (self.MainProducts.price_base/(100-self.commission_platform)*100)

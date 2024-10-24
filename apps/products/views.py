@@ -8,12 +8,14 @@ from unidecode import unidecode
 import pandas as pd
 from apps.master_price.connection_meli import connMeli
 from apps.master_price.connections_sodimac import ConnectionsSodimac
+from apps.master_price.handle_database import update_or_create_main_product 
 
 def update(request):
     print(f'*** inicia actualizacion base productos {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}***')
     try:
         shopi = ConnectionsShopify()
-        shopi.get_all_products()
+        products = shopi.get_all_products()
+        update_or_create_main_product(products)
         data = {'status': 'success'}
         print(f'*** inicia actualizacion base productos {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}***')
     except Exception as e:

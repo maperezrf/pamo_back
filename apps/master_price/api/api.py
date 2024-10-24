@@ -69,14 +69,32 @@ class OAuthAPIView(APIView):
         pass
 
 
-class NotificationHandlerShopífy(APIView):
+class NotificationProductShopy(APIView):
     
     def post(self, request):
         print('\n**********************se recivió una notificación shopify******************************\n')
-        data = request.data
-        print(data)
-        update_or_create_main_product(data)
-        return Response(data = data)
+        dic = request.data
+        dic_data ={}
+        dic_data['product_id'] = {}
+        {'product_id': {'id': dic['admin_graphql_api_id'],
+        'tags' : dic['tags'].split(','),
+        'title': dic['title'],
+        'vendor': dic['vendor'],
+        'status': dic['status'],
+        'category': {'fullName': 'Uncategorized'}},
+        'variant': [{
+            'id': i['admin_graphql_api_id'],
+            'price': i['price'],
+            'compareAtPrice':  i['compare_at_price'] if i['compare_at_price'] else 0,
+            'sku': i['sku'],
+            'barcode': i['barcode'],
+            'inventoryQuantity': i['inventory_quantity'],
+            'image': None,
+            'inventoryItem': {'unitCost': {'amount': '45100.0'}}, #TODO hay que crear una consulta para traer el costo por que no se tiene
+            '__parentId': dic['admin_graphql_api_id']
+        } for i in dic['variants']]}
+        update_or_create_main_product(dic_data)
+        return Response(data = dic_data)
 
 class NotificationCreateOrderShopify(APIView):
         
