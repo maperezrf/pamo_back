@@ -74,6 +74,8 @@ class NotificationProductShopy(APIView):
     def post(self, request):
         print('\n**********************se recivió una notificación shopify******************************\n')
         dic = request.data
+        print(dic)
+        print(type(dic))
         dic_data ={}
         dic_data['product_id'] = {}
         {'product_id': {'id': dic['admin_graphql_api_id'],
