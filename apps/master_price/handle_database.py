@@ -47,8 +47,11 @@ def delete_main_product(product_json):
 
 
 def update_or_create_main_product(products):
+        
         for index, product in enumerate(products):
             for i in product['variant']:
+                print(i)
+                print(product)
                 try:
                     index += 1
                     element, created = MainProducts.objects.get_or_create(id_product = product['product_id']['id'], id_variantShopi = i['id'], sku = i['sku'] )
