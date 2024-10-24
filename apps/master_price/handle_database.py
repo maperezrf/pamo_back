@@ -41,7 +41,7 @@ from apps.master_price.graphiqL_queries import GET_COST_PRODUCT
 #         object.save()
     
 def delete_main_product(product_json):
-    item = MainProducts.objects.filter(id_product = 9212662022421 )
+    item = MainProducts.objects.filter(id_product = f'gid://shopify/Product/{product_json[id]}' )
     for i in item:
         i.delete()
 
