@@ -95,7 +95,7 @@ class NotificationProductShopy(APIView):
             '__parentId': dic['admin_graphql_api_id']
         } for i in dic['variants']]}
         print(dic_data)
-        update_or_create_main_product(dic_data)
+        update_or_create_main_product([dic_data])
         return Response(data = dic_data)
 
 class NotificationCreateOrderShopify(APIView):
