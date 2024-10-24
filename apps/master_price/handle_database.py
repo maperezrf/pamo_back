@@ -41,9 +41,6 @@ from apps.master_price.graphiqL_queries import GET_COST_PRODUCT
 #         object.save()
     
 def delete_main_product(product_json):
-    print('desde la funcion')
-    print(type(product_json))
-    print(product_json['id'])
     item = MainProducts.objects.filter(id_product = 'gid://shopify/Product/'+ str(product_json['id'] ))
     for i in item:
         i.delete()
@@ -53,12 +50,9 @@ def update_or_create_main_product(products):
         
         for index, product in enumerate(products):
             for i in product['variant']:
-                print(i)
-                print(product)
                 try:
                     index += 1
                     element, created = MainProducts.objects.get_or_create(id_product = product['product_id']['id'], id_variantShopi = i['id'], sku = i['sku'] )
-                    print(element)
                 except Exception as e:
                     if "UNIQUE constraint failed" in str(e):
                         element = MainProducts()
