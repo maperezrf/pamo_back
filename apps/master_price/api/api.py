@@ -94,6 +94,7 @@ class NotificationProductShopy(APIView):
             'inventoryItem': {'unitCost': {'amount': '45100.0'}}, #TODO hay que crear una consulta para traer el costo por que no se tiene
             '__parentId': dic['admin_graphql_api_id']
         } for i in dic['variants']]}
+        print(dic_data)
         update_or_create_main_product(dic_data)
         return Response(data = dic_data)
 
