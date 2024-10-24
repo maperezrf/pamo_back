@@ -44,9 +44,9 @@ def delete_main_product(product_json):
     print('desde la funcion')
     print(type(product_json))
     print(product_json['id'])
-    # item = MainProducts.objects.filter(id_product = f'gid://shopify/Product/{product_json['id']}' )
-    # for i in item:
-    #     i.delete()
+    item = MainProducts.objects.filter(id_product = 'gid://shopify/Product/'+product_json['id'] )
+    for i in item:
+        i.delete()
 
 
 def update_or_create_main_product(products):
