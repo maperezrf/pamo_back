@@ -72,10 +72,8 @@ class OAuthAPIView(APIView):
 class NotificationProductShopy(APIView):
     
     def post(self, request):
-        print('\n**********************se recivió una notificación shopify******************************\n')
+        print('\n**********************se creo o actualizo un producto una notificación shopify******************************\n')
         dic = request.data
-        print(dic)
-        print(type(dic))
         dic_data ={
         'product_id': {'id': dic['admin_graphql_api_id'],
         'tags' : dic['tags'].split(','),
@@ -94,7 +92,6 @@ class NotificationProductShopy(APIView):
             'inventoryItem': {'unitCost': {'amount': '45100.0'}}, #TODO hay que crear una consulta para traer el costo por que no se tiene
             '__parentId': dic['admin_graphql_api_id']
         } for i in dic['variants']]}
-        print(dic_data)
         update_or_create_main_product([dic_data])
         return Response(data = dic_data)
 

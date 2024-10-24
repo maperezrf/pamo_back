@@ -52,6 +52,7 @@ def update_or_create_main_product(products):
                 try:
                     index += 1
                     element, created = MainProducts.objects.get_or_create(id_product = product['product_id']['id'], id_variantShopi = i['id'], sku = i['sku'] )
+                    print(element)
                 except Exception as e:
                     if "UNIQUE constraint failed" in str(e):
                         element = MainProducts()
