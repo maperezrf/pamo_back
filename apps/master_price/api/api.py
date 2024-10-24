@@ -76,9 +76,8 @@ class NotificationProductShopy(APIView):
         dic = request.data
         print(dic)
         print(type(dic))
-        dic_data ={}
-        dic_data['product_id'] = {}
-        {'product_id': {'id': dic['admin_graphql_api_id'],
+        dic_data ={
+        'product_id': {'id': dic['admin_graphql_api_id'],
         'tags' : dic['tags'].split(','),
         'title': dic['title'],
         'vendor': dic['vendor'],
