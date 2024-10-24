@@ -109,7 +109,7 @@ class ConnectionsShopify():
         return df.loc[df['existencia'] != df['stock_shopyfi']]
     
     def get_all_products(self):
-        # self.request_graphql(CREATION_BULK)
+        self.request_graphql(CREATION_BULK)
         status = 'RUNNING'
         while status == 'RUNNING':
             response_bulk = self.request_graphql(REQUEST_FINISH_BULK)
