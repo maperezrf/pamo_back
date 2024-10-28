@@ -6,7 +6,9 @@ print('\n\n\n*********************************PRODUCCION**********************\n
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', cast=bool)
 
-ALLOWED_HOSTS = ['https://pamofront-nexuspamo.up.railway.app', '*']
+ALLOWED_HOSTS = ['https://pamofront-nexuspamo.up.railway.app']
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 
 CORS_ALLOW_HEADERS = [
