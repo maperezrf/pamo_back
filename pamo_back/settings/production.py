@@ -6,6 +6,11 @@ print('\n\n\n*********************************PRODUCCION**********************\n
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', cast=bool)
 
+CORS_ALLOWED_ORIGINS =[
+   'https://*.pamofront-nexuspamo.up.railway.app',
+   'pamofront-nexuspamo.up.railway.app'
+]
+
 ALLOWED_HOSTS = ['https://*.pamofront-nexuspamo.up.railway.app','pamofront-nexuspamo.up.railway.app', 'pamoback-nexuspamo.up.railway.app']
 
 
