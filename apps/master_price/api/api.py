@@ -14,6 +14,7 @@ from apps.master_price.connection_meli import connMeli
 from apps.master_price.connections_melonn import connMelonn
 from apps.master_price.handle_database import update_or_create_main_product, delete_main_product
 from pamo_back.queries import *
+from apps.master_price.utils import read_seets
 
 
 class masterPriceAPIView(APIView):
@@ -139,13 +140,7 @@ class ConnectionSheets(APIView):
         
     def post(self, request):
         id = request.data['id']
-        conn = ConnectionsGoogleSheets()
-        file = conn.read_file(id)
-        sheets = conn.get_all_sheets(file)
-        sheets_dic =[{'name':i.title, 'id':i.id} for i in  sheets]
-        df = conn.sheet_to_df(file)
-        df = df[[i for i in df.columns if i != '']]
-        df = df.loc[(df['sku'] != '')].reset_index(drop=True)
+        df, file, sheets_dic = read_seets(id)
         table = df.to_dict(orient='records')
         title = file.title
         data = {'table': table, 'title': title, 'columns':df.columns, 'sheets':sheets_dic}
@@ -160,26 +155,29 @@ class ConnectionSheets(APIView):
 class ConnectionShopify(APIView):
 
     def get(self, request):
-        self.send_data_shopify()
+
         return Response( status=status.HTTP_200_OK)
 
     def post(self, request):
-        data = request.data
+        id = request.data['id']
+        self.send_data_shopify(id)
     
-    def send_data_shopify(self):
+    def send_data_shopify(self, id):
         # TODO Se debe agregar el inventoryLevelId a la base de datos para actualizar los stocks
-        file = pd.read_excel('C:/Users/USUARIO/Downloads/CATALOGO IMPORTADORA BARU SAS 2009.xlsx')
-        file.rename(columns={'titulo':'title', 'costo':'cost', 'stock':'inventory_quantity', 'proveedor':'vendor', 'estado':'status', 'categoria':'category', 'codigo de barras':'barcode'}, inplace=True)
-        columns = [i for i in file.columns if i in ['sku','title','cost','inventory_quantity','vendor','status','category','barcode']]
+        # TODO agregar metodo para identificar columnas sin datos y quitarlas
+        df, file, sheets_dic = read_seets(id)
+        # file = pd.read_excel('C:/Users/USUARIO/Downloads/CATALOGO IMPORTADORA BARU SAS 2009.xlsx')
+        df.rename(columns={'titulo':'title', 'costo':'cost', 'stock':'inventory_quantity', 'proveedor':'vendor', 'estado':'status', 'categoria':'category', 'codigo de barras':'barcode'}, inplace=True)
+        columns = [i for i in df.columns if i in ['sku','title','cost','inventory_quantity','vendor','status','category','barcode']]
         novelty_list=[]
         list_items=[]
-        for index, row in file.iterrows():
+        for index, row in df.iterrows():
             try:
                 item = SopifyProducts.objects.get(MainProducts__sku = row['sku'])
                 if 'title' in columns:
                     item.MainProducts.title = row.title
                 if 'cost' in columns:
-                    item.MainProducts.cost = int(round(row.cost))
+                    item.MainProducts.cost = round(int(row.cost))
                 if 'inventory_quantity' in columns:
                     item.MainProducts.inventory_quantity = row.inventory_quantity
                 if 'tags' in columns:

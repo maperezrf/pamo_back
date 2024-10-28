@@ -1,5 +1,5 @@
 SELECT
-	main.id_variantShopi,
+	main."id_variantShopi",
 	main.id_product,
 	main.sku,
 	main.cost,
@@ -29,4 +29,4 @@ FROM
 	master_price_mainproducts main
 LEFT JOIN master_price_sopifyproducts shopi
 ON
-	main.id_variantShopi = shopi.MainProducts_id
+	main."id_variantShopi" = shopi."MainProducts_id"
