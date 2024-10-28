@@ -8,9 +8,6 @@ DEBUG = config('DEBUG', cast=bool)
 
 ALLOWED_HOSTS = ['https://pamofront-nexuspamo.up.railway.app']
 
-CORS_ALLOW_ALL_ORIGINS = True
-
-
 CORS_ALLOW_HEADERS = [
     'authorization',
     'content-type',
