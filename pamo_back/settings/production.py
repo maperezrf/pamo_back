@@ -8,6 +8,19 @@ DEBUG = config('DEBUG', cast=bool)
 
 ALLOWED_HOSTS = ['https://pamofront-nexuspamo.up.railway.app', '*']
 
+
+CORS_ALLOW_HEADERS = [
+    'authorization',
+    'content-type',
+]
+
+CORS_ALLOW_METHODS = [
+    'GET',
+    'POST',
+    'PUT',
+    'DELETE',
+]
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
