@@ -11,7 +11,7 @@ CORS_ALLOWED_ORIGINS =[
    'https://pamofront-nexuspamo.up.railway.app'
 ]
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS')
+ALLOWED_HOSTS = list(config('ALLOWED_HOSTS'))
 
 
 DATABASES = {
