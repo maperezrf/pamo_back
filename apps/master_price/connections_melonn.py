@@ -7,7 +7,6 @@ from decouple import config
 class connMelonn:
 
     def __init__(self):
-        self.url = config('MELONN_URL')
         self.headers = {
         'accept': 'application/json',
         'X-Api-Key': config('MELONN_API_KEY'),
@@ -51,5 +50,17 @@ class connMelonn:
         self.data_order = data_order
     
     def create_order(self):
-        response = requests.request("POST", self.url, headers=self.headers, data= json.dumps(self.data_order))
+        response = requests.request("POST", config('MELONN_URL'), headers=self.headers, data= json.dumps(self.data_order))
         return response.json()
+    
+    def get_inventory(self):
+        response= True
+        products = []
+        i = 1
+        while response:
+            url = config('MELONN_STOCK').format(page=i)
+            i +=1
+            response = requests.request("GET", url, headers=self.headers, data={}).json()
+            products.extend(response)
+        return products
+

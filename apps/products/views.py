@@ -9,6 +9,7 @@ import pandas as pd
 from apps.master_price.connection_meli import connMeli
 from apps.master_price.connections_sodimac import ConnectionsSodimac
 from apps.master_price.handle_database import update_or_create_main_product 
+from apps.master_price.handle_database import set_inventory
 
 def update(request):
     print(f'*** inicia actualizacion base productos {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}***')
@@ -57,10 +58,8 @@ def charge_data_sodi(request):
     """
         Cargar datos sodimac
     """
-
     # con = ConnectionsSodimac()
     # con.set_inventory_all()
-    
     try:
         data = {'status': 'success'}
         df = pd.read_csv('C:/Users/USUARIO/Downloads/SKU SODIMAC EAN (2).csv', sep=';')
@@ -90,6 +89,7 @@ def charge_data_sodi(request):
 
 def set_all_inventory_sodimac(request):
     print(f'*** inicia seteo stock sodimac {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}***')
+    set_inventory()
     try:
         products = ProductsSodimac.objects.all() 
         data = {i.ean: i.MainProducts.inventory_quantity for i in products}
@@ -102,4 +102,3 @@ def set_all_inventory_sodimac(request):
     print(data)
     print(f'*** Finaliza seteo stock sodimac {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}***')
     return JsonResponse (data)
-    

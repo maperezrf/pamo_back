@@ -1,6 +1,8 @@
 from apps.master_price.models import MainProducts, SopifyProducts
 from apps.master_price.conecctions_shopify import ConnectionsShopify
+from apps.master_price.connections_melonn import connMelonn
 from apps.master_price.graphiqL_queries import GET_COST_PRODUCT
+import pandas as pd
 
 # def update_or_create_main_product(product_json):
 #     con = ConnectionsShopify()
@@ -47,7 +49,6 @@ def delete_main_product(product_json):
 
 
 def update_or_create_main_product(products):
-        
         for index, product in enumerate(products):
             for i in product['variant']:
                 try:
@@ -74,3 +75,18 @@ def update_or_create_main_product(products):
                 item.barcode = i['barcode']
                 item.category = product['product_id']['category']['fullName'] if product['product_id']['category'] else 'Sin Categoria'
                 item.save()
+
+def set_inventory():
+    con_m = connMelonn()
+    products_melonn = con_m.get_inventory()
+    products_missing = []
+    for i in products_melonn:
+        try:
+            product = MainProducts.objects.get(sku = i['sku'] )
+            product.inventory_quantity = i['inventoryByWarehouse'][0]['availableQuantity']
+            product.save()
+        except Exception as e:
+            if "MainProducts matching query does not exist." in str(e):
+                products_missing.append(i['sku'])
+    df = pd.DataFrame(products_missing, columns=['sku'])
+    df.to_excel('faltante shopify.xlsx', index=False)
