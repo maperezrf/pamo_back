@@ -17,27 +17,26 @@ class MainProducts(models.Model):
     publicity = models.FloatField(null=True, blank=True, default=2)
     aditional = models.FloatField(null=True, blank=True, default=0)
     packaging_cost = models.IntegerField(null=True, blank=True, default=0)
-    price_base = models.IntegerField(null=True, blank=True, default=0)
+    # price_base = models.IntegerField(null=True, blank=True, default=0) #TODO traer el precio base de Sigo
     image_link = models.CharField(max_length=500, null=True, blank=True)
     title = models.CharField(max_length=300, null=True, blank=True)
-    inventory_quantity = models.IntegerField(null=True, blank=True ,default= 0)
 
-    def save(self, *args, **kwargs) -> None:
-        if self.utility == None:
-            self.utility=18
-        if self.items_number == None:
-            self.items_number = 1
-        if self.publicity == None:
-            self.publicity = 2
-        if self.commission_seller == None:
-            self.commission_seller = 2
-        if self.aditional == None:
-            self.aditional = 0
-        if self.cost != 0:
-            utility = (float(self.cost) / (100-self.utility) * 100)
-            cost_packagin = 2765+((self.items_number-1) * 623)
-            self.price_base = round(((utility + cost_packagin)/(100-self.commission_seller)*100)/(100-self.publicity)*100) + self.aditional
-        return super().save(*args, **kwargs)
+    # def save(self, *args, **kwargs) -> None:
+    #     if self.utility == None:
+    #         self.utility=18
+    #     if self.items_number == None:
+    #         self.items_number = 1
+    #     if self.publicity == None:
+    #         self.publicity = 2
+    #     if self.commission_seller == None:
+    #         self.commission_seller = 2
+    #     if self.aditional == None:
+    #         self.aditional = 0
+    #     if self.cost != 0:
+    #         utility = (float(self.cost) / (100-self.utility) * 100)
+    #         cost_packagin = 2765+((self.items_number-1) * 623)
+    #         self.price_base = round(((utility + cost_packagin)/(100-self.commission_seller)*100)/(100-self.publicity)*100) + self.aditional
+    #     return super().save(*args, **kwargs)
 
 class SopifyProducts(models.Model):
     MainProducts = models.ForeignKey(MainProducts, verbose_name = 'main_product', on_delete=models.CASCADE, null=True, blank=True)
@@ -58,17 +57,17 @@ class SopifyProducts(models.Model):
     def __str__(self) -> str:
         return self.sku if self.sku else ''
     
-    def save(self, *args, **kwargs) -> None:
-        if (self.commission_platform == None) | (self.commission_platform == 0):
-            self.commission_platform = 18
-        if (self.margen_comparacion_db == None) | (self.margen_comparacion_db == 0):
-            self.margen_comparacion_db = 7
-        if self.MainProducts.price_base != 0:
-            price_whitout_shipment = (self.MainProducts.price_base/(100-self.commission_platform)*100)
-            self.shipment_cost = 0 if price_whitout_shipment < 100000 else 7000
-            self.projected_price = round(price_whitout_shipment + self.shipment_cost )
-            self.projected_compare_at_price = round(self.projected_price / (self.margen_comparacion_db / 10))
-        return super().save(*args, **kwargs) 
+    # def save(self, *args, **kwargs) -> None:
+    #     if (self.commission_platform == None) | (self.commission_platform == 0):
+    #         self.commission_platform = 18
+    #     if (self.margen_comparacion_db == None) | (self.margen_comparacion_db == 0):
+    #         self.margen_comparacion_db = 7
+    #     if self.MainProducts.price_base != 0:
+    #         price_whitout_shipment = (self.MainProducts.price_base/(100-self.commission_platform)*100)
+    #         self.shipment_cost = 0 if price_whitout_shipment < 100000 else 7000
+    #         self.projected_price = round(price_whitout_shipment + self.shipment_cost )
+    #         self.projected_compare_at_price = round(self.projected_price / (self.margen_comparacion_db / 10))
+    #     return super().save(*args, **kwargs) 
     
 class ProductsSodimac(models.Model):
     MainProducts = models.ForeignKey(MainProducts, verbose_name = 'main_product', on_delete=models.CASCADE, null=True, blank=True)
@@ -88,10 +87,10 @@ class ProductsSodimac(models.Model):
         if (self.shipment_cost == None) | self.shipment_cost == 0:
             self.shipment_cost = 6900
         self.pricePublication = round(self.MainProducts.price_base/(100-self.commission)*100) + self.guide + self.shipment_cost
-        return super().save(args, **kwargs)
+        return super().save(*args, **kwargs)
     
 class ProductsMeli(models.Model):
-    MainProducts = models.ForeignKey(MainProducts, verbose_name = 'main_product', on_delete=models.CASCADE, null=True, blank=True)
+    MainProducts = models.ForeignKey(MainProducts, verbose_name = 'main_product', on_delete=models.CASCADE, null=True, blank=True, unique=False)
     publication = models.CharField(max_length=50, null=True, blank=True, unique=True)
     commission = models.SmallIntegerField(default = 0)
     pricePublication = models.FloatField(null=True, blank=True, default=0)    
@@ -138,3 +137,14 @@ class OAuthToken(models.Model):
             return settings.ENCRYPTION_KEY.encode()  # Esto debe ser bytes
         except AttributeError:
             raise ImproperlyConfigured("No se ha configurado la clave de encriptación")
+        
+
+class ProductsMelonn(models.Model):
+    MainProducts = models.ForeignKey(MainProducts, verbose_name = 'main_product', on_delete=models.CASCADE, null=True, blank=True)
+    internalCode = models.CharField(max_length=50, null=True, blank=True, unique=True)
+    inventory_quantity = models.IntegerField(null=True, blank=True ,default= 0)
+
+class ProductsFalabella(models.Model):
+    MainProducts = models.ForeignKey(MainProducts, verbose_name = 'main_product', on_delete=models.CASCADE, null=True, blank=True)
+    ShopSku = models.CharField(max_length=50, null=True, blank=True, unique=True)
+    Url = models.CharField(max_length=300, null=True, blank=True)

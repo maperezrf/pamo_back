@@ -1,5 +1,6 @@
-from apps.master_price.models import MainProducts, SopifyProducts
+from apps.master_price.models import MainProducts, SopifyProducts, ProductsMelonn, ProductsFalabella
 from apps.master_price.conecctions_shopify import ConnectionsShopify
+from apps.master_price.Connections_falabella import ConnectionFalabella
 from apps.master_price.connections_melonn import connMelonn
 from apps.master_price.graphiqL_queries import GET_COST_PRODUCT
 import pandas as pd
@@ -47,26 +48,18 @@ def delete_main_product(product_json):
     for i in item:
         i.delete()
 
-
 def update_or_create_main_product(products):
-        for index, product in enumerate(products):
+        count = 0
+        for product in products:
             for i in product['variant']:
-                try:
-                    index += 1
-                    element, created = MainProducts.objects.get_or_create(id_product = product['product_id']['id'], id_variantShopi = i['id'], sku = i['sku'] )
-                except Exception as e:
-                    if "UNIQUE constraint failed" in str(e):
-                        element = MainProducts()
-                        element.id_product = product['product_id']
-                        element.id_variantShopi = i['id']
-                        element.sku = f'duplicidad sku:{i["sku"]} indice:{index}'
+                count += 1
+                element, created = MainProducts.objects.get_or_create(id_product = product['product_id']['id'], id_variantShopi = i['id'], sku = str(i['sku']).upper().strip() if i['sku'] else f'{i["sku"]} indice:{count}')
                 element.title = product['product_id']['title']
                 element.cost = i['inventoryItem']['unitCost']['amount'] if  i['inventoryItem']['unitCost'] else 0
                 element.packaging_cost = (2765 + ((element.items_number-1)*623))
                 element.image_link = product['image']['src'] if 'image' in product else 'sin imagen'
-                element.inventory_quantity = i['inventoryQuantity']
                 element.save()
-                item, relation_created  = SopifyProducts.objects.get_or_create(MainProducts = element)
+                item, relation_created = SopifyProducts.objects.get_or_create(MainProducts = element)
                 item.tags = product['product_id']['tags']
                 item.vendor = product['product_id']['vendor']
                 item.status = product['product_id']['status']
@@ -82,11 +75,55 @@ def set_inventory():
     products_missing = []
     for i in products_melonn:
         try:
-            product = MainProducts.objects.get(sku = i['sku'] )
+            product = MainProducts.objects.get(sku = i['sku'].upper().strip() )
             product.inventory_quantity = i['inventoryByWarehouse'][0]['availableQuantity']
             product.save()
         except Exception as e:
             if "MainProducts matching query does not exist." in str(e):
+                print('no encontrado')
+                print( i['sku'].upper().strip())
                 products_missing.append(i['sku'])
     df = pd.DataFrame(products_missing, columns=['sku'])
     df.to_excel('faltante shopify.xlsx', index=False)
+
+def set_products_melonn():
+    con_m = connMelonn()
+    products_melonn = con_m.get_inventory()
+    skus_main_products = {p.sku: p for p in MainProducts.objects.filter(sku__in=[p['sku'] for p in products_melonn])}
+    to_update = []
+    to_create = []
+    for i in products_melonn:
+        main_p = skus_main_products.get(i['sku'])
+        if main_p:
+            item, created = ProductsMelonn.objects.get_or_create(MainProducts=main_p)
+        else:
+            item, created = ProductsMelonn.objects.get_or_create(internalCode=i['sku'])
+        item.internalCode = i['internalCode']
+        item.inventory_quantity = i['inventoryByWarehouse'][0]['availableQuantity']
+        if created:
+            to_create.append(item)
+        else:
+            to_update.append(item)
+    if to_create:
+        ProductsMelonn.objects.bulk_create(to_create)
+    if to_update:
+        ProductsMelonn.objects.bulk_update(to_update, ['internalCode', 'inventory_quantity'])
+    print('Finaliza')
+
+def set_products_falabella():
+    con_f = ConnectionFalabella()
+    response = con_f.request_falabella('GetProducts')
+    products = response.json()['SuccessResponse']['Body']['Products']['Product']
+    skus_main_products = {p.sku: p for p in MainProducts.objects.filter(sku__in=[p['SellerSku'] for p in products])}
+    to_update = []
+    for i in products:
+        main_p = skus_main_products.get(i['SellerSku'])
+        if main_p:
+            item, created = ProductsFalabella.objects.get_or_create(MainProducts=main_p)
+        else:
+            item, created = ProductsFalabella.objects.get_or_create(ShopSku=i['ShopSku'])
+        item.ShopSku = i['ShopSku']
+        item.Url = i['Url']
+        to_update.append(item)
+    ProductsFalabella.objects.bulk_update(to_update, ['ShopSku', 'Url'])
+    print('Finaliza')

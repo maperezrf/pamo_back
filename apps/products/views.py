@@ -8,8 +8,8 @@ from unidecode import unidecode
 import pandas as pd
 from apps.master_price.connection_meli import connMeli
 from apps.master_price.connections_sodimac import ConnectionsSodimac
-from apps.master_price.handle_database import update_or_create_main_product 
-from apps.master_price.handle_database import set_inventory
+from apps.master_price.handle_database import update_or_create_main_product, set_inventory, set_products_melonn, set_products_falabella
+
 
 def update(request):
     print(f'*** inicia actualizacion base productos {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}***')
@@ -62,22 +62,20 @@ def charge_data_sodi(request):
     # con.set_inventory_all()
     try:
         data = {'status': 'success'}
-        df = pd.read_csv('C:/Users/USUARIO/Downloads/SKU SODIMAC EAN (2).csv', sep=';')
+        df = pd.read_excel('C:/Users/USUARIO/Downloads/SKU SODIMAC.xlsx')
         listado_not_found = []
         listado = []
         cont = 0
         for index, row in df.iterrows():
             try:
-                item = ProductsSodimac()
-                item.MainProducts = MainProducts.objects.get(sku = row.sku_pamo)
-                item.publication = row.sku_sodimac
-                item.ean = row.ean
-                item.save()
+                main_product = MainProducts.objects.get(sku = str(row.sku_pamo).upper().strip())
+                item, create = ProductsSodimac.objects.get_or_create(MainProducts=main_product, publication=row.sku_sodimac, ean=row.ean)
             except Exception as e:
                 if 'MainProducts matching query does not exist.' in str(e):
-                    listado_not_found.append(row.sku_pamo)
-                    print(row.sku_pamo)
+                    listado_not_found.append(str(row.sku_pamo).upper())
+                    print(str(row.sku_pamo).upper())
                     print(e)
+                    listado.append(row.sku_pamo)
                 elif 'UNIQUE constraint failed' in str(e):
                     print(e)
                 else:
@@ -102,3 +100,14 @@ def set_all_inventory_sodimac(request):
     print(data)
     print(f'*** Finaliza seteo stock sodimac {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}***')
     return JsonResponse (data)
+
+def set_products_melonn_view(request):
+    set_products_melonn()
+    return JsonResponse ({})
+
+def set_products_falabella_view(request):
+    request = set_products_falabella()
+    return JsonResponse ({})
+
+
+

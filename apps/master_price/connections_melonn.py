@@ -54,6 +54,7 @@ class connMelonn:
         return response.json()
     
     def get_inventory(self):
+        import pandas as pd
         response= True
         products = []
         i = 1
@@ -63,4 +64,3 @@ class connMelonn:
             response = requests.request("GET", url, headers=self.headers, data={}).json()
             products.extend(response)
         return products
-

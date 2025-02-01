@@ -27,7 +27,7 @@ class masterPriceAPIView(APIView):
 class OAuthAPIView(APIView):  
 
     def get(self, request):
-        self.update_products()
+        # self.update_products()
         return Response(data = {'price_cost'})
  
     def update_products(self):
@@ -40,7 +40,7 @@ class OAuthAPIView(APIView):
                 publicacion = con_meli.get_publication_detail(i)
                 if publicacion['status'] == 'active':
                     item, create = ProductsMeli.objects.get_or_create(publication= i)
-                    item.sku = unidecode([i for i in publicacion['attributes'] if i['id'] =='SELLER_SKU' ][0]['value_name'].upper().strip()) if len([ i for i in publicacion['attributes'] if i['id'] =='SELLER_SKU' ]) > 0 else ''
+                    item.sku = unidecode([ i.get('value_name') for i in publicacion.get('attributes', []) if  i.get('id') == 'SELLER_SKU'][0].upper())
                     item_main, create = MainProducts.objects.get_or_create(sku=item.sku) if item.sku else (0, True)
                     if not create:
                         item.main_product =  item_main
@@ -212,8 +212,6 @@ class ConnectionShopify(APIView):
         self.set_variables( merge[columns])
         return merge[columns]
     
-
-
     def set_variables(self, df):
         print('seteando variables')
         variables = []
