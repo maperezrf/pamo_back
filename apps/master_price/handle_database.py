@@ -82,7 +82,7 @@ def set_inventory():
     products_missing = []
     for i in products_melonn:
         try:
-            product = MainProducts.objects.get(sku = i['sku'] )
+            product = MainProducts.objects.get(sku = i['sku'].upper )
             product.inventory_quantity = i['inventoryByWarehouse'][0]['availableQuantity']
             product.save()
         except Exception as e:
