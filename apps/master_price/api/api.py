@@ -38,27 +38,33 @@ class OAuthAPIView(APIView):
         for i in products:
             try:
                 publicacion = con_meli.get_publication_detail(i)
-                if publicacion['status'] == 'active':
+                if (publicacion['status'] == 'active') | (publicacion['status'] == 'paused'):
                     item, create = ProductsMeli.objects.get_or_create(publication= i)
                     item.sku = unidecode([i for i in publicacion['attributes'] if i['id'] =='SELLER_SKU' ][0]['value_name'].upper().strip()) if len([ i for i in publicacion['attributes'] if i['id'] =='SELLER_SKU' ]) > 0 else ''
-                    item_main, create = MainProducts.objects.get_or_create(sku=item.sku) if item.sku else (0, True)
-                    if not create:
-                        item.main_product =  item_main
+                    item_main =  MainProducts.objects.filter(sku=item.sku.strip().upper())
+                    if item_main:
+                        item.main_product =  item_main[0]
+                    else:
+                        print(item.sku.strip().upper())
                     item.commission = 18
                     item.pricePublication = publicacion['price']
                     item.crossed_out_price = publicacion['original_price']
                     item.link = publicacion['permalink']
-                    price_whitout_shipped = (item_main.price_base/(100- item.commission)*100)
-                    if (price_whitout_shipped < 3000):
-                        commission_aditional = 2500
-                    elif (price_whitout_shipped >= 30000) & (price_whitout_shipped <= 60000) :
-                        commission_aditional = 4000
-                    else:
-                        commission_aditional = 0
-                    price_comissions = price_whitout_shipped + commission_aditional
-                    item.shipment_cost if price_comissions < 60000 else 0
-                    item.projected_price = round(price_comissions + item.shipment_cost)
+                    # TODO pendiente el precio base
+                    # price_whitout_shipped = (item_main.price_base/(100- item.commission)*100)
+                    # if (price_whitout_shipped < 3000):
+                    #     commission_aditional = 2500
+                    # elif (price_whitout_shipped >= 30000) & (price_whitout_shipped <= 60000) :
+                    #     commission_aditional = 4000
+                    # else:
+                    #     commission_aditional = 0
+                    # price_comissions = price_whitout_shipped + commission_aditional
+                    # item.shipment_cost if price_comissions < 60000 else 0
+                    # item.projected_price = round(price_comissions + item.shipment_cost)
+                    item.status = publicacion['status']
                     item.save()
+                else:
+                    print(publicacion)
             except Exception as e:
                 products_not_found.append(publicacion)
                 print(e)

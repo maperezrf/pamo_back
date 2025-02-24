@@ -50,6 +50,7 @@ class ProductsMeli(models.Model):
     crossed_out_price = models.FloatField(null=True, blank=True, default=0)    
     shipment_cost = models.FloatField(null=True, blank=True, default=0)
     link = models.CharField(max_length=300, null=True, blank=True)
+    status = models.CharField(max_length=50, null=True, blank=True)
 
 class OAuthToken(models.Model):
     access_token = models.TextField()

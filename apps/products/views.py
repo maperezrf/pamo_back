@@ -10,6 +10,7 @@ from apps.master_price.connection_meli import connMeli
 from apps.master_price.connections_sodimac import ConnectionsSodimac
 from apps.master_price.handle_database import update_or_create_main_product 
 from apps.master_price.handle_database import set_inventory
+from apps.master_price.connections_melonn import connMelonn
 
 def update(request):
     print(f'*** inicia actualizacion base productos {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}***')
@@ -60,25 +61,27 @@ def charge_data_sodi(request):
     """
     # con = ConnectionsSodimac()
     # con.set_inventory_all()
+    con_melonn = connMelonn()
+    products = con_melonn.get_inventory()
     try:
+        ProductsSodimac.objects.all().delete()
         data = {'status': 'success'}
-        df = pd.read_csv('C:/Users/USUARIO/Downloads/SKU SODIMAC EAN (2).csv', sep=';')
+        df = pd.read_excel('C:/Users/maper/Downloads/SKU SODIMAC 150225.xlsx')
         listado_not_found = []
         listado = []
         cont = 0
         for index, row in df.iterrows():
             try:
                 item = ProductsSodimac()
-                item.MainProducts = MainProducts.objects.get(sku = row.sku_pamo)
-                item.publication = row.sku_sodimac
-                item.ean = row.ean
+                item.main_product = MainProducts.objects.filter(sku = str(row['SKU PAMO']).strip().upper()).first()
+                item.publication = row.ID_PRODUCTO
+                item.ean = row.EAN
                 item.save()
+                if not item.main_product:
+                    listado_not_found.append(row['SKU PAMO'])
+                    print(row['SKU PAMO'])
             except Exception as e:
-                if 'MainProducts matching query does not exist.' in str(e):
-                    listado_not_found.append(row.sku_pamo)
-                    print(row.sku_pamo)
-                    print(e)
-                elif 'UNIQUE constraint failed' in str(e):
+                if 'UNIQUE constraint failed' in str(e):
                     print(e)
                 else:
                     raise e 
