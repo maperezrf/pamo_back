@@ -64,13 +64,11 @@ def update_or_create_main_product(products):
                 element.cost = i['inventoryItem']['unitCost']['amount'] if  i['inventoryItem']['unitCost'] else 0
                 element.packaging_cost = (2765 + ((element.items_number-1)*623))
                 element.image_link = product['image']['src'] if 'image' in product else 'sin imagen'
-                element.inventory_quantity = i['inventoryQuantity']
                 element.save()
                 item, relation_created  = SopifyProducts.objects.get_or_create(MainProducts = element)
                 item.tags = product['product_id']['tags']
                 item.vendor = product['product_id']['vendor']
                 item.status = product['product_id']['status']
-                item.real_price = i['price']
                 item.compare_at_price = i['compareAtPrice']
                 item.barcode = i['barcode']
                 item.category = product['product_id']['category']['fullName'] if product['product_id']['category'] else 'Sin Categoria'
