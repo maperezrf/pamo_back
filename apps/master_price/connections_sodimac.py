@@ -110,8 +110,8 @@ class ConnectionsSodimac():
         for i in (data):
             dic = {}
             dic["proveedor"] = REFERENCIA_FPRN
-            dic["ean"] = i
-            dic["inventarioDispo"] = data[i]
+            dic["ean"] = i['ean']
+            dic["inventarioDispo"] = int(i['inventarioDispo'])
             dic["stockMinimo"] = 0
             dic["canal"] = "Bodega MeloS"
             dic["usuario"] = "Bot"

@@ -2,6 +2,8 @@ import requests
 import re
 import json
 from decouple import config
+from apps.master_price.models import MainProducts, melonn
+import pandas as pd
 
 
 class connMelonn:
@@ -63,4 +65,22 @@ class connMelonn:
             response = requests.request("GET", url, headers=self.headers, data={}).json()
             products.extend(response)
         return products
+    
+    def set_inventory(self):
+        con_m = connMelonn()
+        products_melonn = con_m.get_inventory()
+        products_missing = []
+        for i in products_melonn:
+            products = MainProducts.objects.filter(sku = i['sku'].upper())
+            item = melonn.objects.get_or_create(publication = i['internalCode'])[0]
+            if products:
+                item.main_product = products[0]
+            else:
+                products_missing.append(i['sku'])
+            item.sku = i['sku']
+            item.publication = i['internalCode']
+            item.stock = i['inventoryByWarehouse'][0]['availableQuantity']
+            item.save() 
+        df = pd.DataFrame(products_missing, columns=['sku'])
+        df.to_excel('faltante shopify.xlsx', index=False)
 

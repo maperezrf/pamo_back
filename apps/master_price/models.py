@@ -90,3 +90,9 @@ class OAuthToken(models.Model):
             return settings.ENCRYPTION_KEY.encode()  # Esto debe ser bytes
         except AttributeError:
             raise ImproperlyConfigured("No se ha configurado la clave de encriptación")
+        
+class melonn(models.Model):
+    main_product = models.ForeignKey(MainProducts, verbose_name = 'main_product', on_delete=models.CASCADE, null=True, blank=True)
+    publication = models.CharField(max_length=50, null=True, blank=True, unique=True)
+    stock = models.IntegerField(default=0, null=True, blank=True)
+    sku = models.CharField(max_length=100, null=True, blank=True, unique=True)

@@ -74,17 +74,3 @@ def update_or_create_main_product(products):
                 item.category = product['product_id']['category']['fullName'] if product['product_id']['category'] else 'Sin Categoria'
                 item.save()
 
-def set_inventory():
-    con_m = connMelonn()
-    products_melonn = con_m.get_inventory()
-    products_missing = []
-    for i in products_melonn:
-        try:
-            product = MainProducts.objects.get(sku = i['sku'].upper )
-            product.inventory_quantity = i['inventoryByWarehouse'][0]['availableQuantity']
-            product.save()
-        except Exception as e:
-            if "MainProducts matching query does not exist." in str(e):
-                products_missing.append(i['sku'])
-    df = pd.DataFrame(products_missing, columns=['sku'])
-    df.to_excel('faltante shopify.xlsx', index=False)
