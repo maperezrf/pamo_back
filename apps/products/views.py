@@ -92,8 +92,8 @@ def charge_data_sodi(request):
 
 def set_all_inventory_sodimac(request):
     print(f'*** inicia seteo stock sodimac {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}***')
-    # con_melonn = connMelonn()
-    # con_melonn.set_inventory()
+    con_melonn = connMelonn()
+    con_melonn.set_inventory()
     try:
         products_sodi = ProductsSodimac.objects.filter(main_product__isnull=False)
         ids = [i.main_product.id_variantShopi for i in products_sodi]
