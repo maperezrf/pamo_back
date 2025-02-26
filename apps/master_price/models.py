@@ -17,6 +17,7 @@ class MainProducts(models.Model):
     packaging_cost = models.IntegerField(null=True, blank=True, default=0)
     image_link = models.CharField(max_length=500, null=True, blank=True)
     title = models.CharField(max_length=300, null=True, blank=True)
+    stock = models.IntegerField(default=0, null=False, blank=False)
 
 class SopifyProducts(models.Model):
     MainProducts = models.ForeignKey(MainProducts, verbose_name = 'main_product', on_delete=models.CASCADE, null=True, blank=True)

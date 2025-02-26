@@ -51,19 +51,17 @@ def delete_main_product(product_json):
 def update_or_create_main_product(products):
         for index, product in enumerate(products):
             for i in product['variant']:
-                try:
-                    index += 1
-                    element, created = MainProducts.objects.get_or_create(id_product = product['product_id']['id'], id_variantShopi = i['id'], sku = i['sku'] )
-                except Exception as e:
-                    if "UNIQUE constraint failed" in str(e):
-                        element = MainProducts()
+                index += 1
+                element, created = MainProducts.objects.get_or_create(id_product = product['product_id']['id'], id_variantShopi = i['id'], sku = i['sku'] )
+                if created:
                         element.id_product = product['product_id']
                         element.id_variantShopi = i['id']
                         element.sku = f'duplicidad sku:{i["sku"]} indice:{index}'
                 element.title = product['product_id']['title']
-                element.cost = i['inventoryItem']['unitCost']['amount'] if  i['inventoryItem']['unitCost'] else 0
+                # element.cost = i['inventoryItem']['unitCost']['amount'] if  i['inventoryItem']['unitCost'] else 0
                 element.packaging_cost = (2765 + ((element.items_number-1)*623))
                 element.image_link = product['image']['src'] if 'image' in product else 'sin imagen'
+                element.stock = i['inventoryQuantity']
                 element.save()
                 item, relation_created  = SopifyProducts.objects.get_or_create(MainProducts = element)
                 item.tags = product['product_id']['tags']
