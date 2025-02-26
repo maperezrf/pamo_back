@@ -92,17 +92,15 @@ def charge_data_sodi(request):
 
 def set_all_inventory_sodimac(request):
     print(f'*** inicia seteo stock sodimac {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}***')
-    con_melonn = connMelonn()
-    con_melonn.set_inventory()
     try:
         products_sodi = ProductsSodimac.objects.filter(main_product__isnull=False)
         ids = [i.main_product.id_variantShopi for i in products_sodi]
         products_sodi = products_sodi.values()
-        melonn_products = melonn.objects.filter(main_product__in = ids).values()
+        main_products = MainProducts.objects.filter(id_variantShopi__in = ids).values()
         products_sodi_df = pd.DataFrame(products_sodi)
-        melonn_products_df = pd.DataFrame(melonn_products)
-        merge = products_sodi_df.merge(melonn_products_df[['stock', 'main_product_id', 'publication', 'sku']], how='left', on= 'main_product_id', suffixes=('_sodi', '_melonn'))
-        data = merge.loc[merge['stock_melonn'].notna()][['ean','stock_melonn']].rename(columns={'stock_melonn':'inventarioDispo'}).to_dict(orient="records")
+        main_products_df = pd.DataFrame(main_products)
+        merge = products_sodi_df.merge(main_products_df[['stock', 'id_variantShopi','sku']], how='left', left_on= 'main_product_id', right_on= 'id_variantShopi', suffixes=('_sodi', '_main'))
+        data = merge.loc[merge['stock_main'].notna()][['ean','stock_main']].rename(columns={'stock_main':'inventarioDispo'}).to_dict(orient="records")
         con = ConnectionsSodimac()
         con.set_inventory(data)
         data = {'status': 'success'}
