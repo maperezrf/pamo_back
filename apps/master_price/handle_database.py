@@ -16,23 +16,26 @@ def update_or_create_main_product(products):
             index += 1
             try:
                 element, created = MainProducts.objects.get_or_create(id_product = product['product_id']['id'], id_variantShopi = i['id'], sku = i['sku'] )
-            except Exception as e :
-                element, created = MainProducts.objects.get_or_create(id_product = product['product_id']['id'], id_variantShopi = i['id'], sku = f"dplicado {i['sku']}-{index}" )
-            if created:
-                    element.id_product = product['product_id']
-                    element.id_variantShopi = i['id']
-                    element.sku = f'duplicidad sku:{i["sku"]} indice:{index}'
-            element.title = product['product_id']['title']
-            # element.cost = i['inventoryItem']['unitCost']['amount'] if  i['inventoryItem']['unitCost'] else 0
-            element.packaging_cost = (2765 + ((element.items_number-1)*623))
-            element.image_link = product['image']['src'] if 'image' in product else 'sin imagen'
-            element.stock = i['inventoryQuantity']
-            element.save()
-            item, relation_created  = SopifyProducts.objects.get_or_create(MainProducts = element)
-            item.tags = product['product_id']['tags']
-            item.vendor = product['product_id']['vendor']
-            item.status = product['product_id']['status']
-            item.compare_at_price = i['compareAtPrice']
-            item.barcode = i['barcode']
-            item.category = product['product_id']['category']['fullName'] if product['product_id']['category'] else 'Sin Categoria'
-            item.save()
+                if created:
+                        element.id_product = product['product_id']
+                        element.id_variantShopi = i['id']
+                        element.sku = f'duplicidad sku:{i["sku"]} indice:{index}'
+                element.title = product['product_id']['title']
+                # element.cost = i['inventoryItem']['unitCost']['amount'] if  i['inventoryItem']['unitCost'] else 0
+                element.packaging_cost = (2765 + ((element.items_number-1)*623))
+                element.image_link = product['image']['src'] if 'image' in product else 'sin imagen'
+                element.stock = i['inventoryQuantity']
+                element.save()
+                item, relation_created  = SopifyProducts.objects.get_or_create(MainProducts = element)
+                item.tags = product['product_id']['tags']
+                item.vendor = product['product_id']['vendor']
+                item.status = product['product_id']['status']
+                item.compare_at_price = i['compareAtPrice']
+                item.barcode = i['barcode']
+                item.category = product['product_id']['category']['fullName'] if product['product_id']['category'] else 'Sin Categoria'
+                item.save()
+            except Exception as e:
+                 print(product['product_id']['id'])
+                 print(i['id'])
+                 print(i['sku'])
+                 print(e)
