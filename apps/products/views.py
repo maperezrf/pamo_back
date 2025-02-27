@@ -19,7 +19,7 @@ def update(request):
         products = shopi.get_all_products()
         update_or_create_main_product(products)
         data = {'status': 'success'}
-        print(f'*** inicia actualizacion base productos {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}***')
+        print(f'*** Finaliza actualizacion base productos {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}***')
     except Exception as e:
         print(e)
         data = {'status': 'fail'}
@@ -61,12 +61,13 @@ def charge_data_sodi(request):
     """
     # con = ConnectionsSodimac()
     # con.set_inventory_all()
-    con_melonn = connMelonn()
-    products = con_melonn.get_inventory()
+    # con_melonn = connMelonn()
+    # products = con_melonn.get_inventory()
     try:
         ProductsSodimac.objects.all().delete()
         data = {'status': 'success'}
-        df = pd.read_excel('C:/Users/maper/Downloads/SKU SODIMAC 150225.xlsx')
+        df = pd.read_excel('C:/Users/maper/Downloads/stock 1.xlsx')
+        df = df.loc[df['EAN'].notna()]
         listado_not_found = []
         listado = []
         cont = 0
