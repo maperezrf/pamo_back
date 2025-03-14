@@ -1,12 +1,15 @@
 import requests
+import json
 
-print('se incia desde el bot')
+url = "https://pamoback-nexuspamo.up.railway.app/master_price/products/"
 
-url = 'https://pamoback-nexuspamo.up.railway.app/products/set_inventory_sodimac'
-response = requests.get(url)
+payload = json.dumps({
+  "process": 5
+})
+headers = {
+  'Content-Type': 'application/json'
+}
 
-if response.status_code == 200:
-    print(f"Solicitud GET exitosa: {response.text}")
+response = requests.request("POST", url, headers=headers, data=payload)
 
-else:
-    print(f"Error al enviar solicitud GET: {response.status_code}")
+print(response.text)

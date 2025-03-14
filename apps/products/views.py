@@ -8,23 +8,22 @@ from unidecode import unidecode
 import pandas as pd
 from apps.master_price.connection_meli import connMeli
 from apps.master_price.connections_sodimac import ConnectionsSodimac
-from apps.master_price.handle_database import update_or_create_main_product 
 from apps.master_price.connections_melonn import connMelonn
 from apps.master_price.connections_melonn import connMelonn
 
-def update(request):
-    print(f'*** inicia actualizacion base productos {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}***')
-    try:
-        shopi = ConnectionsShopify()
-        products = shopi.get_all_products()
-        update_or_create_main_product(products)
-        data = {'status': 'success'}
-        print(f'*** Finaliza actualizacion base productos {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}***')
-    except Exception as e:
-        print(e)
-        data = {'status': 'fail'}
-        print(f'*** la actualizacion de productos fallo {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}***')
-    return JsonResponse(data)
+# def update(request):
+#     print(f'*** inicia actualizacion base productos {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}***')
+#     try:
+#         shopi = ConnectionsShopify()
+#         products = shopi.get_all_products()
+#         # update_or_create_main_product(products)
+#         data = {'status': 'success'}
+#         print(f'*** Finaliza actualizacion base productos {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}***')
+#     except Exception as e:
+#         print(e)
+#         data = {'status': 'fail'}
+#         print(f'*** la actualizacion de productos fallo {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}***')
+#     return JsonResponse(data)
 
 def delete(request):
     MainProducts.objects.all().delete()
@@ -59,10 +58,6 @@ def charge_data_sodi(request):
     """
         Cargar datos sodimac
     """
-    # con = ConnectionsSodimac()
-    # con.set_inventory_all()
-    # con_melonn = connMelonn()
-    # products = con_melonn.get_inventory()
     try:
         ProductsSodimac.objects.all().delete()
         data = {'status': 'success'}
@@ -74,7 +69,7 @@ def charge_data_sodi(request):
         for index, row in df.iterrows():
             try:
                 item = ProductsSodimac()
-                item.main_product = MainProducts.objects.filter(sku = str(row['SKU PAMO']).strip().upper()).first()
+                item.main_product = MainProducts.objects.get(sku = str(row['SKU PAMO']).strip().upper()).first()
                 item.publication = row.ID_PRODUCTO
                 item.ean = row.EAN
                 item.save()

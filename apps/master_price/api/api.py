@@ -12,17 +12,88 @@ from apps.master_price.connections_google_sheets import ConnectionsGoogleSheets
 from apps.master_price.conecctions_shopify import ConnectionsShopify
 from apps.master_price.connection_meli import connMeli
 from apps.master_price.connections_melonn import connMelonn
-from apps.master_price.handle_database import update_or_create_main_product, delete_main_product
+from apps.master_price.connections_falabella import ConnectionFalabella
 from pamo_back.queries import *
 from apps.master_price.utils import read_seets
+from datetime import datetime
+import requests
+import threading
 
 
-class masterPriceAPIView(APIView):
+class ProductsAPIView(APIView):
 
     def get(self, request):
-        query = read_sql('get_shopify_products')
-        results = execute_query(query, COLUMNS_SHOPIFY )
+        results = StatusProcess.objects.all().values()
         return Response( data = results, status=status.HTTP_200_OK)
+    
+    def post(self, request):
+        data = request.data
+        process = data['process']
+        if process == 1:
+            thread_update_shopify = threading.Thread(target=self.update_products_shopify)
+            thread_update_shopify.start()
+            print('Actualización en segundo plano')
+        if process == 2:
+            thread_update_meli = threading.Thread(target=self.update_prodcuts_meli)
+            thread_update_meli.start()
+            print('Actualización en segundo plano')
+        if process == 3:
+            thread_update_fala = threading.Thread(target=self.update_prodcuts_fala)
+            thread_update_fala.start()
+            print('Actualización en segundo plano')
+        if process == 4:
+            try:
+                response = self.set_inventory_fala()
+                print(response)
+                print(response.json())
+            except Exception as e:
+                data ={'error':str(e)}
+                return Response(data, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        if process == 5:
+            thread_update_fala = threading.Thread(target=self.update_all_db)
+            thread_update_fala.start()
+            print('Actualización en segundo plano')
+        return Response(status=status.HTTP_200_OK)
+                 
+    def update_products_shopify(self):
+        print(f'*** inicia actualizacion base productos {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}***')
+        try:
+            shopi = ConnectionsShopify()
+            shopi.update_products()
+            data = {'status': 'success'}
+            print(f'*** Finaliza actualizacion base productos {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}***')
+            return Response(data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            print(e)
+            data = {'status': 'fail'}
+            print(f'*** la actualizacion de productos fallo {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}***')
+            return Response(data, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    def update_prodcuts_meli(self):
+        con_meli = connMeli()
+        con_meli.get_products_to_add()
+
+    def update_prodcuts_fala(self):
+        conn_fala = ConnectionFalabella()
+        conn_fala.get_products_to_add()
+
+    def set_inventory_fala(self):
+        conn_fala = ConnectionFalabella()
+        return conn_fala.set_inventory()
+
+    def update_all_db(self):
+        self.update_products_shopify()
+        self.update_prodcuts_meli()
+        self.update_prodcuts_fala()
+        self.set_inventory_fala()
+        # TODO traer el metodo de seteo de stock sodimac aqui
+        url = 'https://pamoback-nexuspamo.up.railway.app/products/set_inventory_sodimac'
+        response = requests.get(url)
+        if response.status_code == 200:
+            print(f"Solicitud GET exitosa: {response.text}")
+        else:
+            print(f"Error al enviar solicitud GET: {response.status_code}")
+
 
 class OAuthAPIView(APIView):  
 
@@ -74,7 +145,6 @@ class OAuthAPIView(APIView):
     def post(self, request):
         data = request.data
         pass
-
 
 class NotificationProductShopy(APIView):
     
@@ -161,7 +231,6 @@ class ConnectionSheets(APIView):
 class ConnectionShopify(APIView):
 
     def get(self, request):
-
         return Response( status=status.HTTP_200_OK)
 
     def post(self, request):
@@ -286,3 +355,24 @@ class ConnectionShopify(APIView):
             else:
                 print('ok')
         return variables
+
+class ConnectionFalabellaApi(APIView):
+
+    def get(self, request):
+        return Response(status=status.HTTP_200_OK)
+    
+    def post(self, request):
+        data = request.data
+        process = data["process"]
+        if process == 1:
+            response = self.set_products()
+        return response
+
+    def set_products(self):
+        try:
+            conn_fala = ConnectionFalabella()
+            response = conn_fala.request_falabella("GetProducts")
+            print(response)
+            return Response(data={"message":"productos actualizados correctamente", "response":response}, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response(data={"message":"No se pudo realizar la actualización"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

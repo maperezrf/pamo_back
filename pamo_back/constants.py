@@ -31,7 +31,10 @@ COLUMNS_COUNT_RELATIONS = ["id_variantShopi", "id_product", "title", "tags", "ve
 
 COLUMNS_SHOPIFY =  ['id_variantShopi', 'id_product', 'sku', 'cost', 'utility', 'items_number', 'commission_seller', 'publicity', 'aditional', 'packaging_cost', 'price_base', 'image_link', 'title', 'inventory_quantity', 'tags', 'vendor', 'status', 'real_price', 'compare_at_price', 'barcode', 'margen_comparacion_db', 'commission_platform', 'category', 'projected_price', 'projected_compare_at_price', 'shipment_cost' ]
 
-
+# Falabella
+URL_API_FALABELLA = config('URL_API_FALABELLA')
+API_KEY_FALABELLA = config('API_KEY_FALABELLA')
+USER_ID_FALABELLA = config('USER_ID_FALABELLA')
 
 APP_ID = config('APP_ID')
 CLIENT_SECRET = config('CLIENT_SECRET')

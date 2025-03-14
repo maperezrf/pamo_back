@@ -8,10 +8,9 @@ from pamo_back.queries  import GET_VARIANT_ID, GET_INVENTORY
 import time
 import json 
 from pamo_back.queries import REQUEST_FINISH_BULK, CREATION_BULK
-from apps.master_price.models import MainProducts, SopifyProducts
+from apps.master_price.models import MainProducts, SopifyProducts, StatusProcess
 from collections import defaultdict
-
-
+from apps.master_price.utils import read_seets, update_status_bot, handle_init_process
 
 class ConnectionsShopify():
 
@@ -20,6 +19,7 @@ class ConnectionsShopify():
 
     def __init__(self) -> None:
         self.headers_shopify = {'X-Shopify-Access-Token' : ACCES_TOKEN, 'Content-Type' : 'application/json'}
+        self.item = StatusProcess.objects.get_or_create(name = 'shopify_update')[0]
 
     def set_orders_df(self, orders):
         self.orders = orders
@@ -109,8 +109,10 @@ class ConnectionsShopify():
         return df.loc[df['existencia'] != df['stock_shopyfi']]
     
     def get_all_products(self):
+        handle_init_process(self.item, True)
         self.request_graphql(CREATION_BULK)
         status = 'RUNNING'
+        update_status_bot(self.item, progress = 5, status = 'Obteniendo Productos' )
         while status == 'RUNNING':
             response_bulk = self.request_graphql(REQUEST_FINISH_BULK)
             status = response_bulk.json()['data']['currentBulkOperation']['status']
@@ -120,14 +122,14 @@ class ConnectionsShopify():
         response_bulk.json()
         file = requests.get(response_bulk.json()['data']['currentBulkOperation']['url'])
         json_lines = file.text.strip().split('\n')
-        products = []
+        self.products = []
         json_lines = [json.loads(i) for i in json_lines]
         dic = {}
-        for index, line in enumerate(json_lines):
+        for _, line in enumerate(json_lines):
             if 'tags' in line:
                 if dic:
                     dic = {}
-                    products.append(dic)
+                    self.products.append(dic)
                 dic['product_id'] = line
                 dic['variant'] = []
             elif '__parentId' in line:
@@ -135,4 +137,53 @@ class ConnectionsShopify():
                     dic['variant'].append(line)
                 if 'src' in line:
                     dic['image'] = line
-        return products
+    
+    def update_or_create_main_product(self):
+        acum_percent = 90/len(self.products)
+        progress = 10
+        try:
+            for index, product in enumerate(self.products):
+                progress += acum_percent
+                update_status_bot(self.item, progress = progress, status = f'Actualizando base: {index+1}/{len(self.products)}' )
+                for i in product['variant']: 
+                    index += 1
+                    try:
+                        element, _ = MainProducts.objects.get_or_create(id_product = product['product_id']['id'], id_variantShopi = i['id'], sku = str(i['sku']).strip().upper())
+                    except Exception as error:
+                            flag = True
+                            while flag:
+                                try: #TODO revisar si es necesario la verificación de los skus
+                                    if 'duplicate key value violates unique constraint' in str(error): 
+                                        element, _ = MainProducts.objects.get_or_create(id_product = product['product_id']['id'], id_variantShopi = i['id'], sku = f" DUPLICADO - {i['sku']} - {index}" )
+                                        print(product['product_id']['id'])
+                                        print(i['id'])
+                                        print(i['sku'])
+                                        print(error)
+                                        flag=False
+                                    if 'duplicate key value violates unique constraint' in str(error):
+                                        print(error)
+                                        index += 1
+                                except Exception as e:
+                                    index += 1
+                                    print(e)
+                    element.title = product['product_id']['title']
+                    element.packaging_cost = (2765 + ((element.items_number-1)*623))
+                    element.image_link = product['image']['src'] if 'image' in product else 'sin imagen'
+                    element.stock = i['inventoryQuantity']
+                    element.save()
+                    item, _  = SopifyProducts.objects.get_or_create(MainProducts = element)
+                    item.tags = product['product_id']['tags']
+                    item.vendor = product['product_id']['vendor']
+                    item.status = product['product_id']['status']
+                    item.compare_at_price = i['compareAtPrice']
+                    item.barcode = i['barcode']
+                    item.category = product['product_id']['category']['fullName'] if product['product_id']['category'] else 'Sin Categoria'
+                    item.save()
+            update_status_bot(self.item, progress = 100, status = f'Proceso finalizado {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
+            handle_init_process(self.item, False)
+        except Exception as e:
+            raise(e)
+
+    def update_products(self):
+        self.get_all_products()
+        self.update_or_create_main_product()
