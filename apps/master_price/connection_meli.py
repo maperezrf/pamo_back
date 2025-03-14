@@ -97,6 +97,7 @@ class connMeli():
         return add_base_products
 
     def get_products_to_add(self):
+        print(f'*** Inicia actualizacion base meli {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}***')
         try:
             self.item, _ = StatusProcess.objects.get_or_create(name='meli_update')
             handle_init_process(self.item, True)
@@ -107,7 +108,8 @@ class connMeli():
             create_product(products_to_add, ProductsMeli, self.item)
             update_status_bot(self.item, progress = 100, status = f'Proceso finalizado {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
             handle_init_process(self.item, False)
+            print(f'*** Terminó actualizacion base meli {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}***')
         except Exception as e:
             update_status_bot(self.item, progress = 0, status = f'El proceso falló :{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
             handle_init_process(self.item, False)
-            
+            print(f'*** Falló actualizacion base meli {datetime.now().strftime("%Y-%m-%d %H:%M:%S")} error :{(str(e))}***')

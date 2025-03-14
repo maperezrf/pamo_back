@@ -95,6 +95,7 @@ class ConnectionFalabella():
         return xml_string
     
     def get_products_to_add(self):
+        print(f'*** Inicia actualizacion base falabella {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}***')
         try:
             self.item, _ = StatusProcess.objects.get_or_create(name='fala_update')
             handle_init_process(self.item, True)
@@ -105,10 +106,19 @@ class ConnectionFalabella():
             create_product(products_to_add, ProductsFala, self.item)
             update_status_bot(self.item, progress = 100, status = f'Proceso finalizado {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
             handle_init_process(self.item, False)
+            print(f'*** Terminó actualizacion base falabella {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}***')
         except Exception as e:
             update_status_bot(self.item, progress = 0, status = f'El proceso falló :{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
             handle_init_process(self.item, False)
+            print(f'*** Falló actualizacion base falabella {datetime.now().strftime("%Y-%m-%d %H:%M:%S")} error :{(str(e))}***')
     
     def set_inventory(self):
-        payload = self.build_request()
-        return self.request_falabella('ProductUpdate', payload)
+        try:
+            print(f'*** Inicia seteo stock falabella {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}***')
+            payload = self.build_request()
+            response =  self.request_falabella('ProductUpdate', payload)
+            print(f'*** Terminó seteo stock falabella {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}***')
+            print(response.json())
+        except Exception as e:
+            print(f'*** Falló seteo stock falabella {datetime.now().strftime("%Y-%m-%d %H:%M:%S")} error :{(str(e))}***')
+    
