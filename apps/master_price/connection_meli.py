@@ -20,7 +20,7 @@ class connMeli():
             self.refresh_token()
 
     def refresh_token(self):
-        refresh_token =  "TG-67d388d674e0b50001c029bc-82071021" #self.oauth.get_refresh_token()    
+        refresh_token =  self.oauth.get_refresh_token()    
         self.get_token(refresh_token)
         
     def get_token(self, code_refresh):
