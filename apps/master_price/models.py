@@ -85,7 +85,7 @@ class BaseProducts(models.Model):
     stock = models.IntegerField(null=True, blank=True ,default= 0)
     commission = models.SmallIntegerField(default = 0)
     shipment_cost = models.FloatField(null=True, blank=True, default=0)
-    url_publication = models.CharField(max_length=200, null=True, blank=True)
+    url_publication = models.CharField(max_length=300, null=True, blank=True)
     status = models.CharField(max_length=50, null=True, blank=True)
     Price = models.FloatField(null=True, blank=True, default=0)    
 

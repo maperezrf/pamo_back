@@ -13,9 +13,11 @@ from apps.master_price.conecctions_shopify import ConnectionsShopify
 from apps.master_price.connection_meli import connMeli
 from apps.master_price.connections_melonn import connMelonn
 from apps.master_price.connections_falabella import ConnectionFalabella
+from apps.master_price.connections_sodimac import ConnectionsSodimac
 from pamo_back.queries import *
 from apps.master_price.utils import read_seets
 from datetime import datetime
+import time
 import requests
 import threading
 
@@ -33,15 +35,15 @@ class ProductsAPIView(APIView):
             thread_update_shopify = threading.Thread(target=self.update_products_shopify)
             thread_update_shopify.start()
             print('Actualización en segundo plano')
-        if process == 2:
+        elif process == 2:
             thread_update_meli = threading.Thread(target=self.update_prodcuts_meli)
             thread_update_meli.start()
             print('Actualización en segundo plano')
-        if process == 3:
+        elif process == 3:
             thread_update_fala = threading.Thread(target=self.update_prodcuts_fala)
             thread_update_fala.start()
             print('Actualización en segundo plano')
-        if process == 4:
+        elif process == 4:
             try:
                 response = self.set_inventory_fala()
                 print(response)
@@ -49,10 +51,13 @@ class ProductsAPIView(APIView):
             except Exception as e:
                 data ={'error':str(e)}
                 return Response(data, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        if process == 5:
+        elif process == 5:
             thread_update_fala = threading.Thread(target=self.update_all_db)
             thread_update_fala.start()
             print('Actualización en segundo plano')
+        elif process == 6:
+            print('Obteniendo inventario sodimac')
+            self.get_inventory_sodimac()
         return Response(status=status.HTTP_200_OK)
                  
     def update_products_shopify(self):
@@ -93,7 +98,26 @@ class ProductsAPIView(APIView):
             print(f"Solicitud GET exitosa: {response.text}")
         else:
             print(f"Error al enviar solicitud GET: {response.status_code}")
-
+    
+    def get_inventory_sodimac(self):
+        conn_sodi = ConnectionsSodimac() 
+        products = ProductsSodimac.objects.exclude(ean='')
+        df_products = pd.DataFrame.from_records(products.values())
+        eanes = []
+        for _, row in df_products.iterrows():
+            if row['ean'] != '':    
+                time.sleep(5)
+                response = conn_sodi.request_inventory_api(row['ean'])
+                if response.status_code  == 200:
+                    if response.json()['result']:
+                        item =  ProductsSodimac.objects.get(ean = row['ean'] )
+                        item.stock = response.json()['result'][0]['inventarioDisponible']
+                        item.save() 
+                    else:
+                        eanes.append(row['ean'])
+                else:
+                    print('error al traer el stock')
+        print(eanes)
 
 class OAuthAPIView(APIView):  
 

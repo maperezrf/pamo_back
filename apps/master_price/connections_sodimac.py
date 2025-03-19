@@ -4,7 +4,7 @@ import pandas as pd
 import json
 from io import StringIO
 from apps.master_price.models import ProductsSodimac, MainProducts
-
+import time
 from django.db.models.functions import Length
 
 class ConnectionsSodimac():
@@ -68,6 +68,7 @@ class ConnectionsSodimac():
         list_response = []
         left = 0
         for i in range(round(len(data)/50)):
+            time.sleep(5)
             right  = left
             left = ((i+1) * 50)
             response = requests.post(URL_SET_INVENTARIO, headers = self.headers, json=data[right:left])
@@ -140,5 +141,5 @@ class ConnectionsSodimac():
             "proveedor": REFERENCIA_FPRN,
             "ean": ean[0:12]
             }
-            response = requests.post(URL_GET_INVENTARIO, headers = self.headers, json=data).json()
+            response = requests.post(URL_GET_INVENTARIO, headers = self.headers, json=data)
             return response
