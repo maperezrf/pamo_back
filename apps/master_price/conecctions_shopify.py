@@ -148,7 +148,9 @@ class ConnectionsShopify():
                 for i in product['variant']: 
                     index += 1
                     try:
-                        element, _ = MainProducts.objects.get_or_create(id_product = product['product_id']['id'], id_variantShopi = i['id'], sku = str(i['sku']).strip().upper())
+                        element, _ = MainProducts.objects.get_or_create(id_product = product['product_id']['id'], id_variantShopi = i['id'])
+                        element.sku = str(i['sku']).strip().upper()
+                        element.save()
                     except Exception as error:
                             flag = True
                             while flag:
