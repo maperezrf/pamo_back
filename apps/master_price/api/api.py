@@ -31,6 +31,7 @@ class ProductsAPIView(APIView):
     def post(self, request):
         data = request.data
         process = data['process']
+        print(process)
         if process == 1:
             thread_update_shopify = threading.Thread(target=self.update_products_shopify)
             thread_update_shopify.start()
