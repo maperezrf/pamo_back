@@ -187,9 +187,9 @@ class NotificationProductShopy(APIView):
             new_customer['customer']['lastName'] = data['last_name']
             new_customer['customer']['email'] = data['email'] 
             new_customer['customer']['addresses'] = {}
-            new_customer['customer']['addresses']['address1'] = '10228352354'
+            new_customer['customer']['addresses']['address1'] = data['nit']
             new_customer['customer']['addresses']['city'] = ''
-            new_customer['customer']['addresses']['company'] ='PAMO_TEST'
+            new_customer['customer']['addresses']['company'] =data['company_name']
             shopi = ConnectionsShopify()
             response = shopi.request_graphql(query=CREATE_CUSTOMER, variables= new_customer )
             if response.json()['data']['customerCreate']['userErrors']:
