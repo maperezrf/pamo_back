@@ -197,7 +197,7 @@ class NotificationProductShopy(APIView):
                 return Response({"message" f"error al crear el cliente error: {error}"},status=status.HTTP_400_BAD_REQUEST)
             return Response({"message" f"Cliente creado correctamente"},status=status.HTTP_201_CREATED)
         else:  
-            return Response({"message":f"Error en los datos del cliente Errores:{serializer.errors}"}, status=status.HTTP_400_BAD_REQUEST )
+            return Response({"message":f"Error al crear el cliente:{serializer.errors}"}, status=status.HTTP_400_BAD_REQUEST )
 
         # print('\n**********************se creo o actualizo un producto una notificación shopify******************************\n')
         # dic = request.data
