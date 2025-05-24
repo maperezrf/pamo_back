@@ -185,7 +185,7 @@ class NotificationProductShopy(APIView):
         print(serializer)
         print('DEBUG: ****************** Validando data ******************')
         if serializer.is_valid():
-            print('DEBUG: ****************** DALA VALIDADA ******************')
+            print('DEBUG: ****************** DATA VALIDADA ******************')
             data = serializer.validated_data
             new_customer = {}
             print('DEBUG: ****************** CONSTRUYENDO VARIABLE  ******************')
@@ -208,6 +208,7 @@ class NotificationProductShopy(APIView):
             print(response.json())
             return Response({"message" f"Cliente creado correctamente"},status=status.HTTP_201_CREATED)
         else:  
+            print(serializer.errors())
             print('********* error ***********')
             return Response({"message":f"Error al crear el cliente:{serializer.errors}"}, status=status.HTTP_400_BAD_REQUEST )
 
