@@ -20,3 +20,10 @@ class MainProductsSerializer(serializers.ModelSerializer):
             'commission_seller', 'publicity', 'aditional', 'packaging_cost', 'price_base',
             'image_link', 'title', 'inventory_quantity', 'sopify_products' 
         ]
+
+class SimpleNewCustomerSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=100, required=True)
+    last_name = serializers.CharField(max_length=100, required=True)
+    nit = serializers.CharField(max_length=20, required=True)
+    company_name = serializers.CharField(max_length=100, required=True)
+    email = serializers.CharField(max_length=100, required=True)

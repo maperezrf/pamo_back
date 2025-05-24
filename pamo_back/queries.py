@@ -375,3 +375,33 @@ REQUEST_FINISH_BULK = """{
     url
   }
 }"""
+
+
+CREATE_CUSTOMER = """
+mutation customerCreate($customer: CustomerInput!) {
+  customerCreate(input: $customer) {
+    customer {
+      id
+      email
+    }
+    userErrors {
+      message
+    }
+  }
+}
+"""
+CUSTOMER_DATA = """
+{"customer": {
+  "firstName": "test",
+  "lastName": "test",
+  "email": "test@test.com",
+  "addresses": [
+    {
+      "address1": "test",
+      "city": "Bogota",
+      "company": "empresa test"
+    }
+  ]
+}
+}
+"""

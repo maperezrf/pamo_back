@@ -61,7 +61,8 @@ def charge_data_sodi(request):
     try:
         ProductsSodimac.objects.all().delete()
         data = {'status': 'success'}
-        df = pd.read_excel('C:/Users/maper/Downloads/stock 1.xlsx')
+        df = pd.read_excel('C:/Users/maper/Downloads/SKU SOODIMAC 10425.xlsx',sheet_name='INDIVIDUAL', dtype=str)
+        df = df.loc[df['SKU S'].notna()]
         df = df.loc[df['EAN'].notna()]
         listado_not_found = []
         listado = []
@@ -69,16 +70,18 @@ def charge_data_sodi(request):
         for index, row in df.iterrows():
             try:
                 item = ProductsSodimac()
-                item.main_product = MainProducts.objects.get(sku = str(row['SKU PAMO']).strip().upper()).first()
-                item.publication = row.ID_PRODUCTO
+                item.main_product = MainProducts.objects.get(sku = str(row['SKUSII']).strip().upper())
+                item.publication = row['SKU S']
                 item.ean = row.EAN
                 item.save()
-                if not item.main_product:
-                    listado_not_found.append(row['SKU PAMO'])
-                    print(row['SKU PAMO'])
             except Exception as e:
                 if 'UNIQUE constraint failed' in str(e):
                     print(e)
+                elif "MainProducts matching query does not exist" in str(e):
+                    listado_not_found.append(row['SKUSII'])
+                    print(row['SKUSII'])
+                elif 'get() returned more than one MainProducts' in str(e):
+                    print(f'sku duplicado: {str(row['SKUSII']).strip().upper()}')
                 else:
                     raise e 
     except Exception as e:

@@ -16,6 +16,7 @@ from apps.master_price.connections_falabella import ConnectionFalabella
 from apps.master_price.connections_sodimac import ConnectionsSodimac
 from pamo_back.queries import *
 from apps.master_price.utils import read_seets
+from apps.master_price.api.serializer import SimpleNewCustomerSerializer
 from datetime import datetime
 import time
 import requests
@@ -172,30 +173,54 @@ class OAuthAPIView(APIView):
         pass
 
 class NotificationProductShopy(APIView):
-    
+
+    def get(self, request):
+        return Response(status=status.HTTP_200_OK)
+        
     def post(self, request):
-        print('\n**********************se creo o actualizo un producto una notificación shopify******************************\n')
-        dic = request.data
-        dic_data ={
-        'product_id': {'id': dic['admin_graphql_api_id'],
-        'tags' : dic['tags'].split(','),
-        'title': dic['title'],
-        'vendor': dic['vendor'],
-        'status': dic['status'],
-        'category': {'fullName': 'Uncategorized'}},
-        'variant': [{
-            'id': i['admin_graphql_api_id'],
-            'price': i['price'],
-            'compareAtPrice':  i['compare_at_price'] if i['compare_at_price'] else 0,
-            'sku': i['sku'],
-            'barcode': i['barcode'],
-            'inventoryQuantity': i['inventory_quantity'],
-            'image': None,
-            'inventoryItem': {'unitCost': {'amount': '45100.0'}}, #TODO hay que crear una consulta para traer el costo por que no se tiene
-            '__parentId': dic['admin_graphql_api_id']
-        } for i in dic['variants']]}
-        update_or_create_main_product([dic_data])
-        return Response(data = dic_data)
+        serializer  = SimpleNewCustomerSerializer(data=request.data)
+        if serializer.is_valid():
+            data = serializer.validated_data
+            new_customer = {}
+            new_customer['customer'] = {}
+            new_customer['customer']['firstName'] = data['name']
+            new_customer['customer']['lastName'] = data['last_name']
+            new_customer['customer']['email'] = data['email'] 
+            new_customer['customer']['addresses'] = {}
+            new_customer['customer']['addresses']['address1'] = '10228352354'
+            new_customer['customer']['addresses']['city'] = ''
+            new_customer['customer']['addresses']['company'] ='PAMO_TEST'
+            shopi = ConnectionsShopify()
+            response = shopi.request_graphql(query=CREATE_CUSTOMER, variables= new_customer )
+            if response.json()['data']['customerCreate']['userErrors']:
+                error = response.json()['data']['customerCreate']['userErrors']
+                return Response({"message" f"error al crear el cliente error: {error}"},status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message" f"Cliente creado correctamente"},status=status.HTTP_201_CREATED)
+        else:  
+            return Response({"message":f"Error en los datos del cliente Errores:{serializer.errors}"}, status=status.HTTP_400_BAD_REQUEST )
+
+        # print('\n**********************se creo o actualizo un producto una notificación shopify******************************\n')
+        # dic = request.data
+        # dic_data ={
+        # 'product_id': {'id': dic['admin_graphql_api_id'],
+        # 'tags' : dic['tags'].split(','),
+        # 'title': dic['title'],
+        # 'vendor': dic['vendor'],
+        # 'status': dic['status'],
+        # 'category': {'fullName': 'Uncategorized'}},
+        # 'variant': [{
+        #     'id': i['admin_graphql_api_id'],
+        #     'price': i['price'],
+        #     'compareAtPrice':  i['compare_at_price'] if i['compare_at_price'] else 0,
+        #     'sku': i['sku'],
+        #     'barcode': i['barcode'],
+        #     'inventoryQuantity': i['inventory_quantity'],
+        #     'image': None,
+        #     'inventoryItem': {'unitCost': {'amount': '45100.0'}}, #TODO hay que crear una consulta para traer el costo por que no se tiene
+        #     '__parentId': dic['admin_graphql_api_id']
+        # } for i in dic['variants']]}
+        # update_or_create_main_product([dic_data])
+        # return Response(data = dic_data)
 
 class NotificationCreateOrderShopify(APIView):
         
