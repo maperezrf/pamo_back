@@ -190,13 +190,13 @@ class CreateClientApi(APIView):
             new_customer = {}
             print('DEBUG: ****************** CONSTRUYENDO VARIABLE  ******************')
             new_customer['customer'] = {}
-            new_customer['customer']['firstName'] = data['name']
-            new_customer['customer']['lastName'] = data['last_name']
-            new_customer['customer']['email'] = data['email'] 
+            new_customer['customer']['firstName'] = data.get('name')
+            new_customer['customer']['lastName'] = data.get('last_name')
+            new_customer['customer']['email'] = data.get('email')
             new_customer['customer']['addresses'] = {}
-            new_customer['customer']['addresses']['address1'] = data['nit']
-            new_customer['customer']['addresses']['city'] = data['city']
-            new_customer['customer']['addresses']['company'] =data['company_name']
+            new_customer['customer']['addresses']['address1'] = data.get('nit')
+            new_customer['customer']['addresses']['city'] = data.get('city')
+            new_customer['customer']['addresses']['company'] =data.get('company_name')
             print('DEBUG: ****************** CONECTANDO A SHOPI ******************')
             shopi = ConnectionsShopify()
             response = shopi.request_graphql(query=CREATE_CUSTOMER, variables= new_customer )

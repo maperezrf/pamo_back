@@ -24,7 +24,7 @@ class MainProductsSerializer(serializers.ModelSerializer):
 class SimpleNewCustomerSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=100, required=True)
     last_name = serializers.CharField(max_length=100, required=True)
+    email = serializers.CharField(max_length=100, required=True)
     nit = serializers.CharField(max_length=20, required=False)
     company_name = serializers.CharField(max_length=100, required=False)
-    email = serializers.CharField(max_length=100, required=True)
     city = serializers.CharField(max_length=100, required=False)
