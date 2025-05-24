@@ -8,7 +8,8 @@ DEBUG = config('DEBUG', cast=bool)
 
 CORS_ALLOWED_ORIGINS =[
    'https://*.pamofront-nexuspamo.up.railway.app',
-   'https://pamofront-nexuspamo.up.railway.app'
+   'https://pamofront-nexuspamo.up.railway.app',
+   'https://www.vambeai.com'
 ]
 
 ALLOWED_HOSTS = list(config('ALLOWED_HOSTS'))
