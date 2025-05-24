@@ -179,10 +179,13 @@ class NotificationProductShopy(APIView):
         
     def post(self, request):
         print('DEBUG: ****************** Si se egeneró el llamado ******************')
+        print('DEBUG: ****************** obteniendo data ******************')
         serializer  = SimpleNewCustomerSerializer(data=request.data)
+        print('DEBUG: ****************** Validando data ******************')
         if serializer.is_valid():
             data = serializer.validated_data
             new_customer = {}
+            print('DEBUG: ****************** CONSTRUYENDO VARIABLE  ******************')
             new_customer['customer'] = {}
             new_customer['customer']['firstName'] = data['name']
             new_customer['customer']['lastName'] = data['last_name']
@@ -191,8 +194,10 @@ class NotificationProductShopy(APIView):
             new_customer['customer']['addresses']['address1'] = data['nit']
             new_customer['customer']['addresses']['city'] = ''
             new_customer['customer']['addresses']['company'] =data['company_name']
+            print('DEBUG: ****************** CONECTANDO A SHOPI ******************')
             shopi = ConnectionsShopify()
             response = shopi.request_graphql(query=CREATE_CUSTOMER, variables= new_customer )
+            print('DEBUG: ****************** vERIFICANDO RESPUESTA ******************')
             if response.json()['data']['customerCreate']['userErrors']:
                 error = response.json()['data']['customerCreate']['userErrors']
                 print(response.json()['data']['customerCreate']['userErrors'])
