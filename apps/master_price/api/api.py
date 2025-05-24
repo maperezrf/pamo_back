@@ -178,6 +178,7 @@ class NotificationProductShopy(APIView):
         return Response(status=status.HTTP_200_OK)
         
     def post(self, request):
+        print('DEBUG: ****************** Si se egeneró el llamado ******************')
         serializer  = SimpleNewCustomerSerializer(data=request.data)
         if serializer.is_valid():
             data = serializer.validated_data
@@ -194,9 +195,12 @@ class NotificationProductShopy(APIView):
             response = shopi.request_graphql(query=CREATE_CUSTOMER, variables= new_customer )
             if response.json()['data']['customerCreate']['userErrors']:
                 error = response.json()['data']['customerCreate']['userErrors']
+                print(response.json()['data']['customerCreate']['userErrors'])
                 return Response({"message" f"error al crear el cliente error: {error}"},status=status.HTTP_400_BAD_REQUEST)
+            print(response.json())
             return Response({"message" f"Cliente creado correctamente"},status=status.HTTP_201_CREATED)
         else:  
+            print(response.json())
             return Response({"message":f"Error al crear el cliente:{serializer.errors}"}, status=status.HTTP_400_BAD_REQUEST )
 
         # print('\n**********************se creo o actualizo un producto una notificación shopify******************************\n')
