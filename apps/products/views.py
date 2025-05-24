@@ -81,7 +81,7 @@ def charge_data_sodi(request):
                     listado_not_found.append(row['SKUSII'])
                     print(row['SKUSII'])
                 elif 'get() returned more than one MainProducts' in str(e):
-                    print(f'sku duplicado: {str(row['SKUSII']).strip().upper()}')
+                    print(f"sku duplicado: {str(row['SKUSII']).strip().upper()}")
                 else:
                     raise e 
     except Exception as e:
