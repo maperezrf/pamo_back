@@ -195,7 +195,7 @@ class NotificationProductShopy(APIView):
             new_customer['customer']['email'] = data['email'] 
             new_customer['customer']['addresses'] = {}
             new_customer['customer']['addresses']['address1'] = data['nit']
-            new_customer['customer']['addresses']['city'] = ''
+            new_customer['customer']['addresses']['city'] = data['city']
             new_customer['customer']['addresses']['company'] =data['company_name']
             print('DEBUG: ****************** CONECTANDO A SHOPI ******************')
             shopi = ConnectionsShopify()
