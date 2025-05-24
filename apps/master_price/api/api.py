@@ -172,7 +172,7 @@ class OAuthAPIView(APIView):
         data = request.data
         pass
 
-class NotificationProductShopy(APIView):
+class CreateClientApi(APIView):
 
     def get(self, request):
         return Response(status=status.HTTP_200_OK)
