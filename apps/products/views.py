@@ -99,6 +99,7 @@ def set_all_inventory_sodimac(request):
         products_sodi_df = pd.DataFrame(products_sodi)
         main_products_df = pd.DataFrame(main_products)
         merge = products_sodi_df.merge(main_products_df[['stock', 'id_variantShopi','sku']], how='left', left_on= 'main_product_id', right_on= 'id_variantShopi', suffixes=('_sodi', '_main'))
+        merge.loc[merge['stock_main']<0, 'stock_main'] = 0
         data = merge.loc[merge['stock_main'].notna()][['ean','stock_main']].rename(columns={'stock_main':'inventarioDispo'}).to_dict(orient="records")
         con = ConnectionsSodimac()
         con.set_inventory(data)

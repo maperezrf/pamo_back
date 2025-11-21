@@ -90,7 +90,7 @@ class ProductsAPIView(APIView):
 
     def update_all_db(self):
         self.update_products_shopify()
-        self.update_prodcuts_meli()
+        #self.update_prodcuts_meli()
         self.update_prodcuts_fala()
         self.set_inventory_fala()
         # TODO traer el metodo de seteo de stock sodimac aqui
@@ -172,45 +172,47 @@ class OAuthAPIView(APIView):
         data = request.data
         pass
 
-class CreateClientApi(APIView):
+# class CreateClientApi(APIView):
 
-    def get(self, request):
-        return Response(status=status.HTTP_200_OK)
+#     def get(self, request):
+#         return Response(status=status.HTTP_200_OK)
         
-    def post(self, request):
-        print('DEBUG: ****************** Si se egeneró el llamado ******************')
-        print('DEBUG: ****************** obteniendo data ******************')
-        print(request.data)
-        serializer  = SimpleNewCustomerSerializer(data=request.data)
-        print(serializer)
-        print('DEBUG: ****************** Validando data ******************')
-        if serializer.is_valid():
-            print('DEBUG: ****************** DATA VALIDADA ******************')
-            data = serializer.validated_data
-            new_customer = {}
-            print('DEBUG: ****************** CONSTRUYENDO VARIABLE  ******************')
-            new_customer['customer'] = {}
-            new_customer['customer']['firstName'] = data.get('name')
-            new_customer['customer']['lastName'] = data.get('last_name')
-            new_customer['customer']['email'] = data.get('email')
-            new_customer['customer']['addresses'] = {}
-            new_customer['customer']['addresses']['address1'] = data.get('nit')
-            new_customer['customer']['addresses']['city'] = data.get('city')
-            new_customer['customer']['addresses']['company'] =data.get('company_name')
-            print('DEBUG: ****************** CONECTANDO A SHOPI ******************')
-            shopi = ConnectionsShopify()
-            response = shopi.request_graphql(query=CREATE_CUSTOMER, variables= new_customer )
-            print('DEBUG: ****************** vERIFICANDO RESPUESTA ******************')
-            if response.json()['data']['customerCreate']['userErrors']:
-                error = response.json()['data']['customerCreate']['userErrors']
-                print(response.json()['data']['customerCreate']['userErrors'])
-                return Response({"message" f"error al crear el cliente error: {error}"},status=status.HTTP_400_BAD_REQUEST)
-            print(response.json())
-            return Response({"message" f"Cliente creado correctamente"},status=status.HTTP_201_CREATED)
-        else:  
-            print(serializer.errors())
-            print('********* error ***********')
-            return Response({"message":f"Error al crear el cliente:{serializer.errors}"}, status=status.HTTP_400_BAD_REQUEST )
+#     def post(self, request):
+#         print('DEBUG: ****************** Si se egeneró el llamado ******************')
+#         print('DEBUG: ****************** obteniendo data ******************')
+#         print(request.data)
+#         serializer  = SimpleNewCustomerSerializer(data=request.data)
+#         print(serializer)
+#         print('DEBUG: ****************** Validando data ******************')
+#         if serializer.is_valid():
+#             print('DEBUG: ****************** DATA VALIDADA ******************')
+#             data = serializer.validated_data
+#             new_customer = {}
+#             print('DEBUG: ****************** CONSTRUYENDO VARIABLE  ******************')
+#             new_customer['customer'] = {}
+#             new_customer['customer']['firstName'] = data.get('name')
+#             new_customer['customer']['lastName'] = data.get('last_name')
+#             new_customer['customer']['email'] = data.get('email')
+#             new_customer['customer']['addresses'] = {}
+#             new_customer['customer']['addresses']['address1'] = data.get('nit')
+#             new_customer['customer']['addresses']['city'] = data.get('city')
+#             new_customer['customer']['addresses']['company'] =data.get('company_name')
+#             print('DEBUG: ****************** CONECTANDO A SHOPI ******************')
+#             shopi = ConnectionsShopify()
+#             response = shopi.request_graphql(query=CREATE_CUSTOMER, variables= new_customer )
+#             print('DEBUG: ****************** vERIFICANDO RESPUESTA ******************')
+#             if response.json()['data']['customerCreate']['userErrors']:
+#                 error = response.json()['data']['customerCreate']['userErrors']
+#                 print(response.json()['data']['customerCreate']['userErrors'])
+#                 if (error[0].get('message') == 'Email has already been taken'):
+#                     return Response({"message" f"El cliente ya esta registrado"},status=status.HTTP_409_CONFLICT)
+#                 return Response({"message" f"error al crear el cliente error: {error}"},status=status.HTTP_400_BAD_REQUEST)
+#             print(response.json())
+#             return Response({"message":f"Cliente creado correctamente"},status=status.HTTP_201_CREATED)
+#         else:  
+#             print(serializer.errors())
+#             print('********* error ***********')
+#             return Response({"message":f"Error al crear el cliente:{serializer.errors}"}, status=status.HTTP_400_BAD_REQUEST )
 
         # print('\n**********************se creo o actualizo un producto una notificación shopify******************************\n')
         # dic = request.data
@@ -235,30 +237,30 @@ class CreateClientApi(APIView):
         # update_or_create_main_product([dic_data])
         # return Response(data = dic_data)
 
-class NotificationCreateOrderShopify(APIView):
+# class NotificationCreateOrderShopify(APIView):
         
-        def post(self, request):
-            print('\n********************** Orden creada shopify ******************************\n')
-            data = request.data
-            print(data)
-            if data['customer']['first_name'] == 'SODIMAC COLOMBIA S A':
-                con = connMelonn()
-                con.create_data(data)
-                response = con.create_order()
-                print(response)
-                if response['statusCode'] == 201:
-                    return  JsonResponse( data = {'message':'success'}, status=status.HTTP_200_OK)
-                else:
-                    return JsonResponse( data = {'message':response['message']}, status=response['statusCode'])
+#         def post(self, request):
+#             print('\n********************** Orden creada shopify ******************************\n')
+#             data = request.data
+#             print(data)
+#             if data['customer']['first_name'] == 'SODIMAC COLOMBIA S A':
+#                 con = connMelonn()
+#                 con.create_data(data)
+#                 response = con.create_order()
+#                 print(response)
+#                 if response['statusCode'] == 201:
+#                     return  JsonResponse( data = {'message':'success'}, status=status.HTTP_200_OK)
+#                 else:
+#                     return JsonResponse( data = {'message':response['message']}, status=response['statusCode'])
 
-class NotificationDeleteShopífy(APIView):
+# class NotificationDeleteShopífy(APIView):
     
-    def post(self, request):
-        print('\n**********************se recivió una notificación shopify******************************\n')
-        data = request.data
-        print(data)
-        delete_main_product(data)
-        return Response(data = data)
+#     def post(self, request):
+#         print('\n**********************se recivió una notificación shopify******************************\n')
+#         data = request.data
+#         print(data)
+#         delete_main_product(data)
+#         return Response(data = data)
     
 class NotificationHandlerMeli(APIView):
 
