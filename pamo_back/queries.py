@@ -104,7 +104,7 @@ GET_DRAFT_ORDER_UPDATE = """
 }}
 """
 
-GET_PRODUCTS ="""
+GET_PRODUCTS = """
 {{
   products(first: 249 {cursor}) {{
     pageInfo {{
@@ -174,7 +174,7 @@ PRODUCT_VARIANT_UPDATE = """
   }
 """
 
-INVENTORY_ADJUST ="""
+INVENTORY_ADJUST = """
   inventoryAdjustQuantity(input: $inventoryAdjustInput) {
   inventoryLevel {
     available
@@ -222,7 +222,6 @@ products(first: 1, query: "sku:{sku}") {{
 """
 
 
-
 GET_VARIANT = """
 {{
   productVariant(id: "{id}") {{
@@ -246,7 +245,7 @@ GET_VARIANT = """
 }}
 """
 
-GET_PRODUCT= """
+GET_PRODUCT = """
 query {{
    product(id : "gid://shopify/Product/{id}") {{
           id
@@ -306,52 +305,66 @@ CREATION_BULK = '''mutation {
   bulkOperationRunQuery(
     query: """
           {
-      products(first: 1) {
-        pageInfo {
-          hasNextPage
-          endCursor
-        }
-        edges {
-          node {
-            id
-            tags
-            title
-            vendor
-            status
-            variants(first: 250) {
+            products(first: 1) {
+              pageInfo {
+                hasNextPage
+                endCursor
+              }
               edges {
                 node {
                   id
-                  price
-                  compareAtPrice
-                  sku
-                  barcode
-                  inventoryQuantity
-                  image {
-                    src
-                  }
-                  inventoryItem {
-                    unitCost {
-                      amount
+                  tags
+                  title
+                  vendor
+                  status
+                  variants(first: 250) {
+                    edges {
+                      node {
+                        id
+                        price
+                        compareAtPrice
+                        sku
+                        barcode
+                        inventoryQuantity
+                        image {
+                          src
+                        }
+                        inventoryItem {
+                          unitCost {
+                            amount
+                          }
+                          inventoryLevels(first: 10) {
+                            edges {
+                              node {
+                                id
+                                location {
+                                  id
+                                  name
+                                }
+                                quantities(names: "available") {
+                                  quantity
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
                     }
                   }
+                  images(first: 1) {
+                    edges {
+                      node {
+                        src
+                      }
+                    }
+                  }
+                  category {
+                    fullName
+                  }
                 }
               }
-            }
-            images(first: 1) {
-              edges {
-                node {
-                  src
-                }
-              }
-            }
-            category {
-              fullName
             }
           }
-        }
-      }
-    }
     """
   ) {
     bulkOperation {

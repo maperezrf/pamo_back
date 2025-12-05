@@ -145,7 +145,7 @@ class ConnectionsShopify():
             for index, product in enumerate(self.products):
                 progress += acum_percent
                 update_status_bot(self.item, progress = progress, status = f'Actualizando base: {index+1}/{len(self.products)}' )
-                for i in product['variant']: 
+                for i in [ i for i in product['variant'] if 'ProductVariant' in i.get('id')]: 
                     index += 1
                     try:
                         element, _ = MainProducts.objects.get_or_create(id_product = product['product_id']['id'], id_variantShopi = i['id'])
@@ -171,7 +171,8 @@ class ConnectionsShopify():
                     element.title = product['product_id']['title']
                     element.packaging_cost = (2765 + ((element.items_number-1)*623))
                     element.image_link = product['image']['src'] if 'image' in product else 'sin imagen'
-                    element.stock = i['inventoryQuantity']
+                    element.stock = [ i.get('quantities',[])[0].get('quantity',0) for i in product['variant'] if i.get('location',{}).get('name',{}) == 'Bodega Envia' ][0]
+                    print(f'SKU: {element.sku} STOCK:{element.stock}')
                     element.save()
                     item, _  = SopifyProducts.objects.get_or_create(MainProducts = element)
                     item.tags = product['product_id']['tags']

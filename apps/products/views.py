@@ -100,8 +100,15 @@ def set_all_inventory_sodimac(request):
         main_products_df = pd.DataFrame(main_products)
         merge = products_sodi_df.merge(main_products_df[['stock', 'id_variantShopi','sku']], how='left', left_on= 'main_product_id', right_on= 'id_variantShopi', suffixes=('_sodi', '_main'))
         merge.loc[merge['stock_main']<0, 'stock_main'] = 0
-        data = merge.loc[merge['stock_main'].notna()][['ean','stock_main']].rename(columns={'stock_main':'inventarioDispo'}).to_dict(orient="records")
         con = ConnectionsSodimac()
+        for index, row in merge.iterrows():
+            response = con.request_inventory_api(row.ean)
+            time.sleep(5)
+            if response.status_code == 200:
+                print(response.json()['result'])
+                merge.loc[merge['ean'] == row.ean, 'novedad'] = response.json()['result'] if response.json()['result'] else 'No encontrado'
+            print(response.json()['result'] if response.json()['result'] else 'No encontrado')
+        data = merge.loc[merge['stock_main'].notna()][['ean','stock_main']].rename(columns={'stock_main':'inventarioDispo'}).to_dict(orient="records")
         con.set_inventory(data)
         data = {'status': 'success'}
     except Exception as e:
