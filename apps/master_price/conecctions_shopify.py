@@ -172,7 +172,6 @@ class ConnectionsShopify():
                     element.packaging_cost = (2765 + ((element.items_number-1)*623))
                     element.image_link = product['image']['src'] if 'image' in product else 'sin imagen'
                     element.stock = [ i.get('quantities',[])[0].get('quantity',0) for i in product['variant'] if i.get('location',{}).get('name',{}) == 'Bodega Envia' ][0]
-                    print(f'SKU: {element.sku} STOCK:{element.stock}')
                     element.save()
                     item, _  = SopifyProducts.objects.get_or_create(MainProducts = element)
                     item.tags = product['product_id']['tags']
