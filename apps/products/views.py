@@ -11,20 +11,6 @@ from apps.master_price.connections_sodimac import ConnectionsSodimac
 from apps.master_price.connections_melonn import connMelonn
 from apps.master_price.connections_melonn import connMelonn
 
-# def update(request):
-#     print(f'*** inicia actualizacion base productos {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}***')
-#     try:
-#         shopi = ConnectionsShopify()
-#         products = shopi.get_all_products()
-#         # update_or_create_main_product(products)
-#         data = {'status': 'success'}
-#         print(f'*** Finaliza actualizacion base productos {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}***')
-#     except Exception as e:
-#         print(e)
-#         data = {'status': 'fail'}
-#         print(f'*** la actualizacion de productos fallo {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}***')
-#     return JsonResponse(data)
-
 def delete(request):
     MainProducts.objects.all().delete()
     data = {'status': 'success'}
@@ -61,27 +47,26 @@ def charge_data_sodi(request):
     try:
         ProductsSodimac.objects.all().delete()
         data = {'status': 'success'}
-        df = pd.read_excel('C:/Users/maper/Downloads/SKU SOODIMAC 10425.xlsx',sheet_name='INDIVIDUAL', dtype=str)
-        df = df.loc[df['SKU S'].notna()]
-        df = df.loc[df['EAN'].notna()]
+        df = pd.read_csv('C:/Users/maper/OneDrive/Escritorio/CODIGOS DE BARRAS.csv', dtype=str, sep=';')
+        df = df.loc[(df['sku_sodimac'].notna()) & (df['sku_pamo'].notna()) & (df['ean'].notna())]
         listado_not_found = []
         listado = []
         cont = 0
         for index, row in df.iterrows():
             try:
                 item = ProductsSodimac()
-                item.main_product = MainProducts.objects.get(sku = str(row['SKUSII']).strip().upper())
-                item.publication = row['SKU S']
-                item.ean = row.EAN
+                item.main_product = MainProducts.objects.get(sku = str(row['sku_pamo']).strip().upper())
+                item.publication = row['sku_sodimac']
+                item.ean = row.ean
                 item.save()
             except Exception as e:
                 if 'UNIQUE constraint failed' in str(e):
                     print(e)
                 elif "MainProducts matching query does not exist" in str(e):
-                    listado_not_found.append(row['SKUSII'])
-                    print(row['SKUSII'])
+                    listado_not_found.append(row['sku_pamo'])
+                    print(row['sku_pamo'])
                 elif 'get() returned more than one MainProducts' in str(e):
-                    print(f"sku duplicado: {str(row['SKUSII']).strip().upper()}")
+                    print(f"sku duplicado: {str(row['sku_pamo']).strip().upper()}")
                 else:
                     raise e 
     except Exception as e:

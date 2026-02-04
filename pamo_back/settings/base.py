@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY')
+SECRET_KEY = config("SECRET_KEY")
 
 # Application definition
 
@@ -22,18 +22,20 @@ BASE_APPS = [
     "django.contrib.staticfiles",
 ]
 
-LOCAL_APPS =[
-    'apps.master_price', 
-    'apps.users',
-    'apps.products'
-]
+LOCAL_APPS = ["apps.master_price", "apps.users", "apps.products"]
 
-THIRD_APPS = [ 
-    'rest_framework',
-    'corsheaders'
-]
+CORS_ALLOWED_ORIGINS = config(
+    "CORS_ALLOWED_ORIGINS", cast=lambda v: [s.strip() for s in v.split(",")]
+)
+print(CORS_ALLOWED_ORIGINS)
 
-INSTALLED_APPS =  BASE_APPS + LOCAL_APPS + THIRD_APPS
+ALLOWED_HOSTS = config(
+    "ALLOWED_HOSTS", cast=lambda v: [s.strip() for s in v.split(",")]
+)
+
+THIRD_APPS = ["rest_framework", "corsheaders"]
+
+INSTALLED_APPS = BASE_APPS + LOCAL_APPS + THIRD_APPS
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
@@ -43,7 +45,7 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
-    "django.middleware.clickjacking.XFrameOptionsMiddleware"
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
 ROOT_URLCONF = "pamo_back.urls"
@@ -107,4 +109,4 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-ENCRYPTION_KEY = config('ENCRYPTION_KEY')
+ENCRYPTION_KEY = config("ENCRYPTION_KEY")

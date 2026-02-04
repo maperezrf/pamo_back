@@ -124,19 +124,35 @@ class ConnectionsShopify():
         json_lines = file.text.strip().split('\n')
         self.products = []
         json_lines = [json.loads(i) for i in json_lines]
-        dic = {}
-        for _, line in enumerate(json_lines):
-            if 'tags' in line:
-                if dic:
-                    dic = {}
-                    self.products.append(dic)
-                dic['product_id'] = line
-                dic['variant'] = []
-            elif '__parentId' in line:
-                if 'id' in line:
-                    dic['variant'].append(line)
-                if 'src' in line:
-                    dic['image'] = line
+        current_product = None
+        current_variant = None
+        for line in json_lines:
+            if '__parentId' not in line:
+                # New product
+                if current_product:
+                    self.products.append(current_product)
+                current_product = line.copy()
+                current_product['variants'] = []
+                current_product['images'] = []
+                current_variant = None
+            elif 'ProductVariant' in line.get('id', ''):
+                # Variant under current product
+                if current_product and line['__parentId'] == current_product['id']:
+                    variant = line.copy()
+                    variant['inventory_levels'] = []
+                    current_product['variants'].append(variant)
+                    current_variant = variant
+            elif 'InventoryLevel' in line.get('id', ''):
+                # Inventory under current variant
+                if current_variant and line['__parentId'] == current_variant['id']:
+                    current_variant['inventory_levels'].append(line)
+            elif 'src' in line:
+                # Image under current product
+                if current_product and line['__parentId'] == current_product['id']:
+                    current_product['images'].append(line['src'])
+        # Append the last product
+        if current_product:
+            self.products.append(current_product)
     
     def update_or_create_main_product(self):
         acum_percent = 90/len(self.products)
@@ -145,10 +161,10 @@ class ConnectionsShopify():
             for index, product in enumerate(self.products):
                 progress += acum_percent
                 update_status_bot(self.item, progress = progress, status = f'Actualizando base: {index+1}/{len(self.products)}' )
-                for i in [ i for i in product['variant'] if 'ProductVariant' in i.get('id')]: 
+                for i in [ i for i in product['variants'] if 'ProductVariant' in i.get('id')]: 
                     index += 1
                     try:
-                        element, _ = MainProducts.objects.get_or_create(id_product = product['product_id']['id'], id_variantShopi = i['id'])
+                        element, _ = MainProducts.objects.get_or_create(id_product = product['id'], id_variantShopi = i['id'])
                         element.sku = str(i['sku']).strip().upper()
                         element.save()
                     except Exception as error:
@@ -156,8 +172,8 @@ class ConnectionsShopify():
                             while flag:
                                 try: #TODO revisar si es necesario la verificación de los skus
                                     if 'duplicate key value violates unique constraint' in str(error): 
-                                        element, _ = MainProducts.objects.get_or_create(id_product = product['product_id']['id'], id_variantShopi = i['id'], sku = f" DUPLICADO - {i['sku']} - {index}" )
-                                        print(product['product_id']['id'])
+                                        element, _ = MainProducts.objects.get_or_create(id_product = product['id'], id_variantShopi = i['id'], sku = f" DUPLICADO - {i['sku']} - {index}" )
+                                        print(product['id'])
                                         print(i['id'])
                                         print(i['sku'])
                                         print(error)
@@ -168,18 +184,22 @@ class ConnectionsShopify():
                                 except Exception as e:
                                     index += 1
                                     print(e)
-                    element.title = product['product_id']['title']
-                    element.packaging_cost = (2765 + ((element.items_number-1)*623))
-                    element.image_link = product['image']['src'] if 'image' in product else 'sin imagen'
-                    element.stock = [ i.get('quantities',[])[0].get('quantity',0) for i in product['variant'] if i.get('location',{}).get('name',{}) == 'Bodega Envia' ][0]
+                    try:
+                        element.title = product['title']
+                        element.packaging_cost = (2765 + ((element.items_number-1)*623))
+                        element.image_link = product['images'][0] if product['images'] else 'sin imagen'
+                        element.stock = next((il['quantities'][0]['quantity'] for il in i['inventory_levels'] if il['location']['name'] == 'Bodega Envia'), 0)
+                    except Exception as e:
+                        if  ("list index out of range" in str(e)) & (product['status']!='ACTIVE'):
+                            element.stock = 0
                     element.save()
                     item, _  = SopifyProducts.objects.get_or_create(MainProducts = element)
-                    item.tags = product['product_id']['tags']
-                    item.vendor = product['product_id']['vendor']
-                    item.status = product['product_id']['status']
+                    item.tags = product['tags']
+                    item.vendor = product['vendor']
+                    item.status = product['status']
                     item.compare_at_price = i['compareAtPrice']
                     item.barcode = i['barcode']
-                    item.category = product['product_id']['category']['fullName'] if product['product_id']['category'] else 'Sin Categoria'
+                    item.category = product['category'] or {}.get('fullName', 'Sin Categoria') 
                     item.save()
             update_status_bot(self.item, progress = 100, status = f'Proceso finalizado {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
             handle_init_process(self.item, False)

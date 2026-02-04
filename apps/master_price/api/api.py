@@ -88,19 +88,22 @@ class ProductsAPIView(APIView):
         conn_fala = ConnectionFalabella()
         return conn_fala.set_inventory()
 
+    def set_inventory_sodimac(self):
+        sodi = ConnectionsSodimac()
+        sodi.set_inventory_all()
+
+
     def update_all_db(self):
-        self.update_products_shopify()
-        #self.update_prodcuts_meli()
-        self.update_prodcuts_fala()
-        self.set_inventory_fala()
-        # TODO traer el metodo de seteo de stock sodimac aqui
-        url = 'https://pamoback-nexuspamo.up.railway.app/products/set_inventory_sodimac'
-        response = requests.get(url)
-        if response.status_code == 200:
-            print(f"Solicitud GET exitosa: {response.text}")
-        else:
-            print(f"Error al enviar solicitud GET: {response.status_code}")
-    
+        try:
+            self.update_products_shopify()
+            #self.update_prodcuts_meli() 
+            self.update_prodcuts_fala()
+            self.set_inventory_fala()
+            self.set_inventory_sodimac()
+            print(f"Solicitud GET exitosa")
+        except Exception as e:
+                print(f"Error al enviar solicitud GET: {str(e)}")
+
     def get_inventory_sodimac(self):
         conn_sodi = ConnectionsSodimac() 
         products = ProductsSodimac.objects.exclude(ean='')

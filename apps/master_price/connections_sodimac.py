@@ -81,29 +81,38 @@ class ConnectionsSodimac():
         return response_data
     
     def set_inventory_all(self):
-        products = ProductsSodimac.objects.all()
+        products = ProductsSodimac.objects.filter(main_product_id__isnull =False)
         skus_actualizados = []
         sku_no_actualizados = []
+        data_dic = []
         for i in products:
             response_get_inventory = self.request_inventory_api(i.ean)
-            if len(response_get_inventory) > 0 :
+            if response_get_inventory:
+                if len(response_get_inventory) >1:
+                    print("aqui hay algo raro")
                 dic = {}
                 dic["proveedor"] = REFERENCIA_FPRN
                 dic["ean"] = i.ean
-                dic["inventarioDispo"] = i.main_product.inventory_quantity
+                dic["inventarioDispo"] = i.main_product.stock
                 dic["stockMinimo"] = 0
-                dic["canal"] = "Bogota"
+                dic["canal"] = "FEPRIN SAS - BOGOTA"
                 dic["usuario"] = "Bot"
-                response = requests.post(URL_SET_INVENTARIO, headers = self.headers, json=dic).json()
-                print(response)
-                print(f"{i.main_product.sku}: Actializacion exitosa")
-                skus_actualizados.append(i.main_product.sku)
-                data = {'success':True, "message":"Actializacion exitosa"}
+                data_dic.append(dic)
             else:
                 print(response_get_inventory)
                 print(f"{i.main_product.sku}: Producto no encontrado")
                 sku_no_actualizados.append(i.main_product.sku)
                 data = {'success':False, "message":"No se encontró ningun producto con el Ean proporcionado"}
+        response = requests.post(URL_SET_INVENTARIO, headers = self.headers, json=data_dic).json()
+        if response['isError']:
+            print("error en la actualizacion")
+        print(response)
+        print(f"{i.main_product.sku}: Actualización exitosa")
+        skus_actualizados.append(i.main_product.sku)
+        i.stock = i.main_product.stock
+        i.save()
+        data = {'success':True, "message":"Actualización exitosa"}
+        print(f'{i.main_product.stock} => {i.main_product.sku} => {i.main_product.stock} => {i.publication}' )
         return data
 
     def get_data_inventory(self, data):
@@ -114,7 +123,7 @@ class ConnectionsSodimac():
             dic["ean"] = i['ean']
             dic["inventarioDispo"] = int(i['inventarioDispo'])
             dic["stockMinimo"] = 0
-            dic["canal"] = "Bodega MeloS"
+            dic["canal"] = "FEPRIN SAS - BOGOTA"
             dic["usuario"] = "Bot"
             data_list.append(dic)
         return data_list
@@ -142,4 +151,4 @@ class ConnectionsSodimac():
             "ean": ean[0:12]
             }
             response = requests.post(URL_GET_INVENTARIO, headers = self.headers, json=data)
-            return response
+            return response.json()['result']
