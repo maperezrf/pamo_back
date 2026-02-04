@@ -81,6 +81,7 @@ class ConnectionsSodimac():
         return response_data
     
     def set_inventory_all(self):
+        print('***********************inicia seteo inventario sodimac *************************')
         products = ProductsSodimac.objects.filter(main_product_id__isnull =False)
         skus_actualizados = []
         sku_no_actualizados = []
@@ -113,6 +114,7 @@ class ConnectionsSodimac():
         i.save()
         data = {'success':True, "message":"Actualización exitosa"}
         print(f'{i.main_product.stock} => {i.main_product.sku} => {i.main_product.stock} => {i.publication}' )
+        print('***********************finaliza seteo inventario sodimac *************************')
         return data
 
     def get_data_inventory(self, data):
